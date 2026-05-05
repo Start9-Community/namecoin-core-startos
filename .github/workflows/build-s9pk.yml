@@ -127,7 +127,7 @@ jobs:
             -v /var/run/docker.sock:/var/run/docker.sock \
             -w /workspace \
             namecoind-sdk:local \
-            sh -c "start-sdk init && start-sdk pack"
+            sh -c "git config --global --add safe.directory /workspace && start-sdk init && start-sdk pack"
           ls -la ./*.s9pk
 
       - name: Verify s9pk
@@ -136,7 +136,7 @@ jobs:
             -v "$PWD:/workspace" \
             -w /workspace \
             namecoind-sdk:local \
-            start-sdk verify s9pk namecoind.s9pk
+            sh -c "git config --global --add safe.directory /workspace && start-sdk verify s9pk namecoind.s9pk"
 
       - name: Upload s9pk artifact
         uses: actions/upload-artifact@v4
