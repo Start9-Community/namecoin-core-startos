@@ -3,19 +3,41 @@ name: Build s9pk
 on:
   push:
     branches: [main, master]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
-defaults:
-  run:
-    working-directory: namecoin-core-startos
-
 jobs:
+  # Build the start-sdk image once; subsequent jobs reuse it as a tool.
+  build-sdk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build start-sdk image
+        run: |
+          docker buildx build \
+            --target sdk \
+            --tag namecoind-sdk:local \
+            --load \
+            -f Dockerfile.sdk .
+      - name: Save SDK image
+        run: docker save namecoind-sdk:local | gzip > sdk.tar.gz
+      - name: Upload SDK image
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-image
+          path: sdk.tar.gz
+          retention-days: 1
+
   build:
+    needs: build-sdk
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        platform: [x86_64]
+        platform: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v4
 
@@ -23,87 +45,108 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
         if: matrix.platform == 'aarch64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
 
       - name: Install yq
         run: |
           sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
           sudo chmod +x /usr/local/bin/yq
 
-      - name: Extract start-sdk from StartOS ISO
-        run: |
-          # Download the x86_64 ISO and extract startbox/start-sdk
-          curl -fsSL -o /tmp/startos.iso "https://github.com/Start9Labs/start-os/releases/download/v0.3.5.1/startos-0.3.5.1-39de098_x86_64.iso"
-          mkdir -p /tmp/iso
-          sudo mount -o loop /tmp/startos.iso /tmp/iso || sudo mount -o loop,ro /tmp/startos.iso /tmp/iso
-          # startbox is typically in /usr/bin or /usr/local/bin on the ISO's squashfs
-          SQFS=$(find /tmp/iso -name '*.squashfs' -o -name 'filesystem.squashfs' 2>/dev/null | head -1)
-          if [ -n "$SQFS" ]; then
-            sudo apt-get install -y squashfs-tools
-            mkdir -p /tmp/sqfs
-            sudo unsquashfs -d /tmp/sqfs "$SQFS"
-            find /tmp/sqfs -name 'startbox' -o -name 'start-sdk' 2>/dev/null | head -5
-            STARTBOX=$(find /tmp/sqfs -name 'startbox' -type f | head -1)
-            if [ -n "$STARTBOX" ]; then
-              sudo cp "$STARTBOX" /usr/local/bin/start-sdk
-              sudo chmod +x /usr/local/bin/start-sdk
-            fi
-          fi
-          # Alternative: check live filesystem directly
-          find /tmp/iso -name 'startbox' -o -name 'start-sdk' 2>/dev/null | head -5
-          which start-sdk && echo "start-sdk ready" || echo "start-sdk not found"
-          sudo umount /tmp/iso 2>/dev/null || true
-
       - name: Extract version
         id: version
-        run: echo "version=$(yq e '.version' manifest.yaml)" >> $GITHUB_OUTPUT
+        run: echo "version=$(yq e '.version' manifest.yaml)" >> "$GITHUB_OUTPUT"
 
       - name: Build x86_64 Docker image
         if: matrix.platform == 'x86_64'
-        run: |
-          mkdir -p docker-images
-          DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build \
-            --tag start9/namecoind/main:${{ steps.version.outputs.version }} \
-            --platform=linux/amd64 \
-            --load .
-          docker save start9/namecoind/main:${{ steps.version.outputs.version }} > docker-images/x86_64.tar
+        run: make x86
 
       - name: Build aarch64 Docker image
         if: matrix.platform == 'aarch64'
-        run: |
-          mkdir -p docker-images
-          DOCKER_CLI_EXPERIMENTAL=enabled docker buildx build \
-            --tag start9/namecoind/main:${{ steps.version.outputs.version }} \
-            --platform=linux/arm64 \
-            -o type=docker,dest=docker-images/aarch64.tar .
+        run: make arm
 
-      - name: Pack s9pk
+      - name: Smoke test image (x86_64 only)
+        if: matrix.platform == 'x86_64'
         run: |
-          if command -v start-sdk &>/dev/null; then
-            start-sdk init 2>/dev/null || true
-            start-sdk pack
-          else
-            echo "start-sdk not available, skipping pack step"
-            echo "Docker image built successfully — manual pack needed"
-          fi
+          docker load < docker-images/x86_64.tar
+          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoind --version
+          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoin-cli --version
 
-      - name: Upload Docker image artifact
+      - name: Upload arch tarball
         uses: actions/upload-artifact@v4
         with:
           name: docker-image-${{ matrix.platform }}
-          path: namecoin-core-startos/docker-images/${{ matrix.platform }}.tar
+          path: docker-images/${{ matrix.platform }}.tar
           retention-days: 7
+
+  pack:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+
+      - name: Download SDK image
+        uses: actions/download-artifact@v4
+        with:
+          name: sdk-image
+          path: .
+
+      - name: Load SDK image
+        run: docker load < sdk.tar.gz
+
+      - name: Download x86_64 tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-x86_64
+          path: docker-images/
+
+      - name: Download aarch64 tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image-aarch64
+          path: docker-images/
+
+      - name: Extract version
+        id: version
+        run: echo "version=$(yq e '.version' manifest.yaml)" >> "$GITHUB_OUTPUT"
+
+      - name: Pack s9pk via SDK container
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -v /var/run/docker.sock:/var/run/docker.sock \
+            -w /workspace \
+            namecoind-sdk:local \
+            sh -c "start-sdk init && start-sdk pack"
+          ls -la ./*.s9pk
+
+      - name: Verify s9pk
+        run: |
+          docker run --rm \
+            -v "$PWD:/workspace" \
+            -w /workspace \
+            namecoind-sdk:local \
+            start-sdk verify s9pk namecoind.s9pk
 
       - name: Upload s9pk artifact
         uses: actions/upload-artifact@v4
-        if: hashFiles('namecoin-core-startos/*.s9pk') != ''
         with:
-          name: namecoind-s9pk
-          path: "namecoin-core-startos/*.s9pk"
+          name: namecoind-s9pk-${{ steps.version.outputs.version }}
+          path: namecoind.s9pk
           retention-days: 30
 
-      - name: Smoke test - verify binary works
-        run: |
-          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoind --version
-          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoin-cli --version
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: namecoind.s9pk
