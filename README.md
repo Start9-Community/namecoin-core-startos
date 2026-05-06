@@ -1,6 +1,11 @@
 # Namecoin Core for StartOS
 
-This is the service wrapper for running [Namecoin Core](https://github.com/namecoin/namecoin-core) on [StartOS](https://github.com/Start9Labs/start-os). It packages Namecoin Core nc30.2 as a `.s9pk` for installation on any StartOS server.
+This is the service wrapper for running [Namecoin Core](https://github.com/namecoin/namecoin-core) on [StartOS](https://github.com/Start9Labs/start-os). It packages Namecoin Core nc30.2 as a `.s9pk` for installation on a StartOS server.
+
+> **StartOS version:** This package targets the **v0.3.5.x** generation
+> (YAML manifest + `compat` image). StartOS v0.4.0 (released May 2026) is
+> a complete rewrite with a TypeScript SDK and is **not** compatible.
+> A v0.4 port would require a separate branch.
 
 ## About Namecoin
 
@@ -34,22 +39,26 @@ Or run `prepare.sh` on a Debian system to install everything automatically.
 Clone this repository:
 
 ```bash
-git clone https://github.com/your-username/namecoin-core-startos.git
+git clone https://github.com/mstrofnone/namecoin-core-startos.git
 cd namecoin-core-startos
 ```
 
-Build for all platforms:
+Build the full s9pk (both architectures):
 
 ```bash
 make
 ```
 
-Build for a single platform:
+Build a single platform's Docker image (no s9pk pack):
 
 ```bash
 make x86    # for amd64
 make arm    # for arm64
 ```
+
+CI builds the same way via the `Build s9pk` workflow, which uses
+`Dockerfile.sdk` to extract `start-sdk` from the official StartOS
+v0.3.5.1 ISO and packs the s9pk inside that container.
 
 ## Installing
 

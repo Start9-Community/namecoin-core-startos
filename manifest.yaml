@@ -1,12 +1,19 @@
 # Namecoin Core service wrapper for StartOS
 id: namecoind
 title: "Namecoin Core"
-version: 30.2.0.1
+version: 30.2.0.2
 release-notes: |
-  * Initial release of Namecoin Core for StartOS
-  * Based on upstream Namecoin Core nc30.2 (Bitcoin Core 30.2 fork)
-  * Full node with name registration, lookup, and wallet functionality
-  * Merged mining support
+  Packaging fix release. No upstream Namecoin Core changes.
+
+  * Flatten repo: package files now live at repo root (matches every other *-startos wrapper).
+  * Fix Makefile so `git clone && make` actually builds the s9pk (default target was the dependency-broken `verify`).
+  * Rework CI into a clean three-stage pipeline (build-sdk -> per-arch build -> pack/verify) and attach the s9pk to GitHub releases on tag push.
+  * Add Dockerfile.sdk to extract `start-sdk` from the official StartOS v0.3.5.x ISO instead of building from source.
+  * Replace Bitcoin DNS seeds with the Namecoin seeder (dnsseed.nmc.testls.space).
+  * Fix config_rules.yaml to use the StartOS compat DSL syntax.
+  * Add .dockerignore and various small cleanups.
+
+  Targets StartOS v0.3.5.x. v0.4.0 (TS SDK + LXC) would need a separate port.
 license: MIT
 wrapper-repo: "https://github.com/mstrofnone/namecoin-core-startos"
 upstream-repo: "https://github.com/namecoin/namecoin-core"

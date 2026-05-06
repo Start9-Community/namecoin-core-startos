@@ -1,0 +1,12 @@
+.git
+.github
+docker-images
+*.s9pk
+*.tar
+*.tar.gz
+.DS_Store
+README.md
+LICENSE
+prepare.sh
+Makefile
+Dockerfile.sdk
