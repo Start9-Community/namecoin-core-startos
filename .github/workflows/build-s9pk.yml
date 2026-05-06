@@ -7,6 +7,12 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Allow softprops/action-gh-release to create/update releases on tag push.
+# Without this, GITHUB_TOKEN is contents:read and the release attach step
+# fails with 403 "Resource not accessible by integration".
+permissions:
+  contents: write
+
 jobs:
   # Build the start-sdk image once; subsequent jobs reuse it as a tool.
   build-sdk:
