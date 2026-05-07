@@ -34,6 +34,7 @@ WORKDIR /build/src
 RUN cmake -B build \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX=/opt/namecoin \
+        -DBUILD_BITCOIN_BIN=OFF \
         -DBUILD_TESTS=OFF \
         -DBUILD_BENCH=OFF \
         -DBUILD_FUZZ_BINARIES=OFF \

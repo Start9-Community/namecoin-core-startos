@@ -27,6 +27,11 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Install squashfs-tools-ng (tar2sqfs)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y squashfs-tools-ng
+
       - name: Install start-cli
         run: |
           set -euo pipefail
