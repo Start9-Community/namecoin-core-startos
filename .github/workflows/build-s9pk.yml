@@ -1,158 +1,77 @@
-name: Build s9pk
+name: Build s9pk (StartOS v0.4.x)
 
 on:
   push:
-    branches: [main, master]
-    tags: ["v*"]
+    branches: [0.4.x]
+    tags: ['v*']
   pull_request:
-  workflow_dispatch:
+    branches: [0.4.x]
 
-# Allow softprops/action-gh-release to create/update releases on tag push.
-# Without this, GITHUB_TOKEN is contents:read and the release attach step
-# fails with 403 "Resource not accessible by integration".
 permissions:
   contents: write
 
 jobs:
-  # Build the start-sdk image once; subsequent jobs reuse it as a tool.
-  build-sdk:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build start-sdk image
-        run: |
-          docker buildx build \
-            --target sdk \
-            --tag namecoind-sdk:local \
-            --load \
-            -f Dockerfile.sdk .
-      - name: Save SDK image
-        run: docker save namecoind-sdk:local | gzip > sdk.tar.gz
-      - name: Upload SDK image
-        uses: actions/upload-artifact@v4
-        with:
-          name: sdk-image
-          path: sdk.tar.gz
-          retention-days: 1
-
   build:
-    needs: build-sdk
     runs-on: ubuntu-latest
     strategy:
-      fail-fast: false
       matrix:
-        platform: [x86_64, aarch64]
+        arch: [x86_64, aarch64]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Set up QEMU
-        if: matrix.platform == 'aarch64'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Install yq
+      - name: Install start-cli
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
+          set -euo pipefail
+          mkdir -p ~/bin
+          curl -fsSL -o ~/bin/start-cli \
+            https://github.com/Start9Labs/start-os/releases/download/v0.4.0-beta.8/start-cli_x86_64-linux
+          chmod +x ~/bin/start-cli
+          echo "$HOME/bin" >> "$GITHUB_PATH"
 
-      - name: Extract version
-        id: version
-        run: echo "version=$(yq e '.version' manifest.yaml)" >> "$GITHUB_OUTPUT"
+      - name: Init developer key
+        run: start-cli init-key
 
-      - name: Build x86_64 Docker image
-        if: matrix.platform == 'x86_64'
-        run: make x86
+      - name: Install npm deps
+        run: npm ci
 
-      - name: Build aarch64 Docker image
-        if: matrix.platform == 'aarch64'
-        run: make arm
+      - name: Type-check
+        run: npm run check
 
-      - name: Smoke test image (x86_64 only)
-        if: matrix.platform == 'x86_64'
+      - name: Build JS bundle
+        run: npm run build
+
+      - name: Pack s9pk for ${{ matrix.arch }}
         run: |
-          docker load < docker-images/x86_64.tar
-          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoind --version
-          docker run --rm start9/namecoind/main:${{ steps.version.outputs.version }} namecoin-cli --version
+          set -euo pipefail
+          start-cli s9pk pack --arch=${{ matrix.arch }} -o namecoind_${{ matrix.arch }}.s9pk
+          ls -la namecoind_${{ matrix.arch }}.s9pk
 
-      - name: Upload arch tarball
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: docker-image-${{ matrix.platform }}
-          path: docker-images/${{ matrix.platform }}.tar
-          retention-days: 7
+          name: namecoind_${{ matrix.arch }}
+          path: namecoind_${{ matrix.arch }}.s9pk
+          if-no-files-found: error
 
-  pack:
+  release:
     needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Install yq
-        run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-
-      - name: Download SDK image
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
-          name: sdk-image
-          path: .
-
-      - name: Load SDK image
-        run: docker load < sdk.tar.gz
-
-      - name: Download x86_64 tarball
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image-x86_64
-          path: docker-images/
-
-      - name: Download aarch64 tarball
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image-aarch64
-          path: docker-images/
-
-      - name: Extract version
-        id: version
-        run: echo "version=$(yq e '.version' manifest.yaml)" >> "$GITHUB_OUTPUT"
-
-      - name: Pack s9pk via SDK container
-        run: |
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            -v /var/run/docker.sock:/var/run/docker.sock \
-            -w /workspace \
-            namecoind-sdk:local \
-            sh -c "git config --global --add safe.directory /workspace && start-sdk init && start-sdk pack"
-          ls -la ./*.s9pk
-
-      - name: Verify s9pk
-        run: |
-          docker run --rm \
-            -v "$PWD:/workspace" \
-            -w /workspace \
-            namecoind-sdk:local \
-            sh -c "git config --global --add safe.directory /workspace && start-sdk verify s9pk namecoind.s9pk"
-
-      - name: Upload s9pk artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: namecoind-s9pk-${{ steps.version.outputs.version }}
-          path: namecoind.s9pk
-          retention-days: 30
+          path: artifacts
 
       - name: Attach to release
-        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: namecoind.s9pk
+          files: artifacts/**/*.s9pk
+          fail_on_unmatched_files: true

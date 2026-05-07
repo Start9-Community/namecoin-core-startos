@@ -1,6 +1,4 @@
-docker-images/
+node_modules/
+javascript/
 *.s9pk
-*.tar
-*.tar.gz
 .DS_Store
-sdk.tar.gz
