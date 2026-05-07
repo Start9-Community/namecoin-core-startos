@@ -40,6 +40,7 @@ RUN cmake -B build \
         -DBUILD_GUI=OFF \
         -DBUILD_TX=ON \
         -DBUILD_UTIL=ON \
+        -DENABLE_IPC=OFF \
         -DENABLE_WALLET=ON \
         -DWITH_ZMQ=ON \
         -DWITH_SQLITE=ON \
