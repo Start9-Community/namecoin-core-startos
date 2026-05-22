@@ -73,7 +73,9 @@ export const generateRpcUser = sdk.Action.withInput(
       const rpcAuthEntries = [existingRpcAuthEntries].flat()
       rpcAuthEntries.push(newRpcAuth)
 
-      await namecoinConfFile.merge(effects, { raw: { rpcauth: rpcAuthEntries } })
+      await namecoinConfFile.merge(effects, {
+        raw: { rpcauth: rpcAuthEntries },
+      })
 
       return {
         version: '1',

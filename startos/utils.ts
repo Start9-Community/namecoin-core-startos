@@ -11,13 +11,10 @@ export const peerPortExternal = 8334
 export const peerPortInternal = 58334
 
 export const rpcPort = 8336
-export const rpcPortPruned = 58336
 
 export const rpcbind = `0.0.0.0:${rpcPort}`
-export const rpcbindPruned = `127.0.0.1:${rpcPortPruned}`
 
 export const rpcallowip = '0.0.0.0/0'
-export const rpcallowipPruned = '127.0.0.1/32'
 
 export const rootDir = '/root/.namecoin'
 export const rpccookiefile = '.cookie'
@@ -76,17 +73,17 @@ export type GetBlockchainInfo = {
 }
 
 /** RPC connection args shared by namecoin-cli and shell-script wrappers. */
-export function rpcArgs(opts: { prune: boolean }): string[] {
+export function rpcArgs(): string[] {
   return [
     `-conf=${rootDir}/namecoin.conf`,
     `-rpccookiefile=${rootDir}/.cookie`,
-    `-rpcport=${opts.prune ? rpcPortPruned : rpcPort}`,
+    `-rpcport=${rpcPort}`,
   ]
 }
 
 /** Full namecoin-cli command prefix for actions running in temp subcontainers. */
-export function namecoinCliArgs(opts: { prune: boolean }): string[] {
-  return ['namecoin-cli', ...rpcArgs(opts)]
+export function namecoinCliArgs(): string[] {
+  return ['namecoin-cli', ...rpcArgs()]
 }
 
 export const zmqBundle = {

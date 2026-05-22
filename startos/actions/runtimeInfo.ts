@@ -1,5 +1,4 @@
 import { T } from '@start9labs/start-sdk'
-import { namecoinConfFile } from '../fileModels/namecoin.conf'
 import { i18n } from '../i18n'
 import { sdk } from '../sdk'
 import {
@@ -27,8 +26,7 @@ export const runtimeInfo = sdk.Action.withoutInput(
 
   // execution function
   async ({ effects }) => {
-    const conf = (await namecoinConfFile.read().const(effects))!
-    // getnetowrkinfo
+    // getnetworkinfo
 
     const networkInfoRes = await sdk.SubContainer.withTemp(
       effects,
@@ -36,10 +34,7 @@ export const runtimeInfo = sdk.Action.withoutInput(
       namecoinMounts,
       'getnetworkinfo',
       async (subc) => {
-        return await subc.execFail([
-          ...namecoinCliArgs({ prune: !!conf.prune }),
-          'getnetworkinfo',
-        ])
+        return await subc.execFail([...namecoinCliArgs(), 'getnetworkinfo'])
       },
     )
 
@@ -55,10 +50,7 @@ export const runtimeInfo = sdk.Action.withoutInput(
       namecoinMounts,
       'getblockchaininfo',
       async (subc) => {
-        return await subc.execFail([
-          ...namecoinCliArgs({ prune: !!conf.prune }),
-          'getblockchaininfo',
-        ])
+        return await subc.execFail([...namecoinCliArgs(), 'getblockchaininfo'])
       },
     )
 

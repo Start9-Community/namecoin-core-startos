@@ -248,7 +248,6 @@ const dict = {
 
   'Full archival': 1741,
 
-
   // actions/config/autoconfig.ts
   'Auto-Configure': 1900,
   'Automatically configure namecoin.conf for the needs of a another service': 1901,

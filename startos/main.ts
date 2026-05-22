@@ -137,7 +137,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
         }),
         fn: async () => {
           const res = await namecoindSub.exec([
-            ...namecoinCliArgs({ prune: !!namecoinConf.prune }),
+            ...namecoinCliArgs(),
             '-rpcconnect=127.0.0.1',
             'getblockchaininfo',
           ])

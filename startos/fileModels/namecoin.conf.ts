@@ -7,9 +7,7 @@ import {
   peerPortExternal,
   peerPortInternal,
   rpcallowip,
-  rpcallowipPruned,
   rpcbind,
-  rpcbindPruned,
   rpccookiefile,
   zmqBundle,
 } from '../utils'
@@ -53,8 +51,8 @@ type ValidNets = z.infer<typeof onlyNetOption>
 
 export const shape = z.object({
   // RPC enforced
-  rpcbind: z.enum([rpcbind, rpcbindPruned]).catch(rpcbind),
-  rpcallowip: z.enum([rpcallowip, rpcallowipPruned]).catch(rpcallowip),
+  rpcbind: z.literal(rpcbind).catch(rpcbind),
+  rpcallowip: z.literal(rpcallowip).catch(rpcallowip),
   rpcuser: z.undefined().optional().catch(undefined),
   rpcpassword: z.undefined().optional().catch(undefined),
   rpccookiefile: z.literal(rpccookiefile).catch(rpccookiefile),
@@ -91,7 +89,6 @@ export const shape = z.object({
   externalip: iniStringArray,
   whitelist: iniStringArray,
   v2transport: iniBoolean,
-  privatebroadcast: iniBoolean,
   connect: iniStringArray,
   addnode: iniStringArray,
   maxconnections: iniNumber,
@@ -319,7 +316,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
     min: 0,
     integer: true,
     units: 'MiB',
-    footnote: `${i18n('Default')}: ${i18n('1024 MiB on systems with ≥ 4 GiB RAM; 450 MiB otherwise')}`,
+    footnote: `${i18n('Default')}: 450 MiB`,
   }),
   dbbatchsize: Value.number({
     name: i18n('Database Batch'),
@@ -387,17 +384,6 @@ export const fullConfigSpec = sdk.InputSpec.of({
     ),
     default: null,
     footnote: `${i18n('Default')}: true`,
-  }),
-  privatebroadcast: Value.triState({
-    name: i18n('Private Broadcast'),
-    description: i18n(
-      'When enabled, transactions submitted via the sendrawtransaction RPC are broadcast over a separate Tor or I2P connection per transaction, hiding the originator IP from peers and unlinking multiple transactions from the same sender. Only affects sendrawtransaction; internal wallet sends are unaffected.',
-    ),
-    default: null,
-    footnote: `${i18n('Default')}: false`,
-    warning: i18n(
-      'Requires Tor or I2P to be active. Namecoin Core will refuse to start if neither is available.',
-    ),
   }),
   connectpeer: Value.union({
     name: i18n('Connect Peer'),
@@ -548,7 +534,6 @@ function fileToForm(
     peerbloomfilters,
     onlynet,
     v2transport,
-    privatebroadcast,
     connect,
     addnode,
     maxconnections,
@@ -598,7 +583,6 @@ function fileToForm(
           )
       : undefined,
     v2transport,
-    privatebroadcast,
     connectpeer: {
       selection:
         connect !== undefined ? ('connect' as const) : ('addnode' as const),
@@ -641,7 +625,6 @@ function formToFile(
     dbbatchsize,
     zmqEnabled,
     v2transport,
-    privatebroadcast,
     onlynet,
     connectpeer,
     maxconnections,
@@ -671,8 +654,8 @@ function formToFile(
     datacarriersize: datacarriersize ?? undefined,
 
     // RPC
-    rpcbind: prune ? rpcbindPruned : rpcbind,
-    rpcallowip: prune ? rpcallowipPruned : rpcallowip,
+    rpcbind,
+    rpcallowip,
 
     // Wallet
     disablewallet: wallet?.enable == null ? undefined : !wallet.enable,
@@ -709,7 +692,6 @@ function formToFile(
 
     // Peer
     v2transport: v2transport ?? undefined,
-    privatebroadcast: privatebroadcast ?? undefined,
     onlynet: onlynet?.length ? input.onlynet?.filter((a) => !!a) : undefined,
     connect:
       connectpeer?.selection === 'connect'

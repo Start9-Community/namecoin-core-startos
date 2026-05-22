@@ -1,22 +1,14 @@
 import { setupManifest } from '@start9labs/start-sdk'
-import {
-  alertRestore,
-  alertUninstall,
-  long,
-  short,
-  torDescription,
-} from './i18n'
+import { long, short, torDescription } from './i18n'
 
 export const manifest = setupManifest({
   id: 'namecoind',
   title: 'Namecoin Core',
   license: 'MIT',
   donationUrl: 'https://www.namecoin.org/donate/',
-  packageRepo:
-    'https://github.com/mstrofnone/namecoin-core-startos/tree/0.4.x',
+  packageRepo: 'https://github.com/Start9-Community/namecoin-core-startos',
   upstreamRepo: 'https://github.com/namecoin/namecoin-core',
   marketingUrl: 'https://www.namecoin.org/',
-  docsUrls: ['https://docs.start9.com/'],
   description: { short, long },
   volumes: ['main'],
   images: {
@@ -30,10 +22,6 @@ export const manifest = setupManifest({
       },
       arch: ['x86_64', 'aarch64'],
     },
-  },
-  alerts: {
-    uninstall: alertUninstall,
-    restore: alertRestore,
   },
   dependencies: {
     tor: {

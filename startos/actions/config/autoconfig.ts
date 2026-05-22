@@ -1,4 +1,7 @@
-import { namecoinConfFile, fullConfigSpec } from '../../fileModels/namecoin.conf'
+import {
+  namecoinConfFile,
+  fullConfigSpec,
+} from '../../fileModels/namecoin.conf'
 import { i18n } from '../../i18n'
 import { sdk } from '../../sdk'
 

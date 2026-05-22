@@ -1,61 +1,57 @@
-# Namecoin Core - Instructions
+# Namecoin Core
 
-## What is Namecoin?
+You've installed Namecoin Core — a full Namecoin node and wallet. Namecoin is the first fork of Bitcoin and provides a decentralized DNS and identity system: censorship-resistant `.bit` domains, identity records, and NMC transactions, with no trusted third party.
 
-Namecoin is the first fork of Bitcoin, providing a decentralized DNS and identity system. It allows you to register `.bit` domains, store identity data, and transact NMC (Namecoin) cryptocurrency — all without trusting any central authority.
+## Documentation
+
+- [Namecoin website](https://www.namecoin.org/) — what Namecoin is and what you can do with it.
+- [Namecoin Core upstream](https://github.com/namecoin/namecoin-core) — the node software this package runs.
+- [Name operations](https://www.namecoin.org/dot-bit/) — registering and managing `.bit` names.
 
 ## Initial Sync
 
-On first install, Namecoin Core must download and verify the entire Namecoin blockchain. This process may take several hours depending on your hardware and internet speed. The Namecoin blockchain is significantly smaller than Bitcoin's (~15 GB).
+On first start, Namecoin Core downloads and verifies the entire blockchain. This can take several hours depending on your hardware and connection; the Namecoin chain is much smaller than Bitcoin's (~15 GB). Watch the **Blockchain Sync** health check on the service's **Dashboard** for progress.
 
-You can monitor sync progress in the **Properties** section of the service page.
+## Connecting to your node
 
-## Connecting to Namecoin Core
+RPC access uses Namecoin Core's auto-generated cookie file, so other services running on the same StartOS server can connect without a password.
 
-### RPC Access
+For **remote** clients (a desktop wallet, a script on another machine), create credentials first:
 
-Your RPC credentials are available in the **Properties** tab. Use these to connect wallets and other services to your Namecoin node.
+1. Open the **Actions** tab.
+2. Run **Generate RPC User Credentials** and choose a username.
+3. Copy and save the generated password — only a hash is stored, so it cannot be recovered later.
 
-- **RPC Port**: 8336
-- **P2P Port**: 8334
+Then connect to the **RPC** interface (port **8336**) using that username and password. The **Peer** interface listens on port **8334**.
 
-### Example RPC Usage (via command line)
+To check live status — connections, block height, sync progress — run the **Runtime Information** action.
 
-```
-namecoin-cli -rpcuser=<username> -rpcpassword=<password> -rpcport=8336 getblockchaininfo
-```
+### Name operations
 
-### Name Operations
+Namecoin's defining feature is its name database. Common RPC calls:
 
-Namecoin Core supports name registration and management via RPC:
-
-- `name_new` — Start registering a name
-- `name_firstupdate` — Complete name registration
-- `name_update` — Update a name's value
-- `name_show` — Look up a name's current value
-- `name_list` — List names in your wallet
-- `name_scan` — Scan the name database
+- `name_new` / `name_firstupdate` — register a name (two-step)
+- `name_update` — change a name's value
+- `name_show` — look up a name
+- `name_list` — list names in your wallet
+- `name_scan` — browse the name database
 
 ## Configuration
 
-### Pruning
+Settings are edited through **Actions** (grouped under **Configuration**), not a single config screen:
 
-By default, Namecoin Core runs as a full archival node. If disk space is limited, you can enable automatic pruning in the **Config** section. Note that pruning is incompatible with the transaction index (txindex).
+- **Other Settings** — pruning, transaction index, database cache, wallet, block filters, ZeroMQ.
+- **Peer Settings** — onlynet, V2 transport, connect/add nodes, max connections.
+- **Mempool Settings** and **RPC Settings** — mempool and RPC tuning.
 
-### Transaction Index
-
-The transaction index is enabled by default. This allows looking up any transaction by its ID and is useful for blockchain exploration. Disable it if you need pruning or want to save some disk space.
+By default the node runs as a full archival node. On a small disk, enable **Pruning** under Other Settings to cap blockchain storage — note that pruning is incompatible with the transaction index, which will be turned off automatically.
 
 ## Backups
 
-Backups include your `wallet.dat` file, which contains your private keys and name registrations. **It is strongly recommended to create regular backups**, especially before any upgrades.
-
-## Merged Mining
-
-Namecoin supports merged mining with Bitcoin. If you are running a mining operation, you can mine both Bitcoin and Namecoin simultaneously. This is not configured through StartOS directly — consult your mining pool's documentation for setup instructions.
+Backups include your wallet and registered names but exclude the blockchain (which is re-synced on restore). **Create a backup before uninstalling or upgrading** — without one, any NMC in the node's wallet and any names you control can be lost permanently.
 
 ## Support
 
 - [Namecoin Forum](https://forum.namecoin.org/)
 - [Namecoin GitHub Issues](https://github.com/namecoin/namecoin-core/issues)
-- [Namecoin Matrix/IRC](https://www.namecoin.org/resources/chat/)
+- [Namecoin Chat](https://www.namecoin.org/resources/chat/)
