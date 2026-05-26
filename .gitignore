@@ -1,6 +1,8 @@
-docker-images/
 *.s9pk
-*.tar
-*.tar.gz
+startos/*.js
+node_modules/
 .DS_Store
-sdk.tar.gz
+.vscode/
+docker-images
+javascript
+ncc-cache
