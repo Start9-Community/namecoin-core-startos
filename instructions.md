@@ -50,6 +50,39 @@ By default the node runs as a full archival node. On a small disk, enable **Prun
 
 Backups include your wallet and registered names but exclude the blockchain (which is re-synced on restore). **Create a backup before uninstalling or upgrading** — without one, any NMC in the node's wallet and any names you control can be lost permanently.
 
+## Using your node from Amethyst (Nostr client)
+
+[Amethyst](https://github.com/vitorpamplona/amethyst) is a Nostr client for Android that can resolve `.bit` / `d/` / `id/` Namecoin names to Nostr identities (for NIP-05 verification, follow-import, and search). From the *Namecoin* settings screen you can point Amethyst directly at *this* Namecoin Core node via JSON-RPC instead of using third-party ElectrumX servers — the most sovereign option, no public operator sees your lookups.
+
+What you need:
+
+1. **An RPC user** for the remote client. Run **Actions → Generate RPC User Credentials**, pick a username, and copy the generated password (only a hash is stored, so you can't recover it later).
+2. **The RPC interface URL** for the *RPC* service interface (port 8336). Open **Service Interfaces → RPC** and copy one of the addresses:
+   - **Tor onion** (recommended for phones over the public internet) — the `http://<onion>.onion:8336/` URL listed under the *Tor* address.
+   - **LAN HTTPS** — if Amethyst is on the same network and you've installed the StartOS root CA on the device.
+   - **LAN HTTP / IP** — only on a trusted LAN.
+
+Then in Amethyst:
+
+1. **Settings → Namecoin** → set **Resolution backend** to **Namecoin Core RPC**.
+2. Paste the URL into **RPC URL** (must start with `http://` or `https://`, must include the port).
+3. Paste the username into **RPC username** and the password into **RPC password**.
+4. Tap **Test RPC**. A green card showing `chain=main height=… sync=…%` confirms the connection.
+5. (Optional) Under **Fallback policy**, decide whether Amethyst is allowed to fall back to ElectrumX if your node is unreachable. Both toggles default **off** — enabling them widens who sees the lookup, so opt in deliberately.
+
+From that point on every `.bit` / `d/` / `id/` lookup in Amethyst (search bar, NIP-05 verification, follow-import) runs `name_show` against *this* node.
+
+Under the hood Amethyst issues a plain JSON-RPC `name_show` POST, identical to:
+
+```
+curl --user '<USER>:<PASS>' \
+     --data-binary '{"jsonrpc":"1.0","id":"x","method":"name_show","params":["d/example"]}' \
+     -H 'Content-Type: text/plain' \
+     http://<onion>.onion:8336/
+```
+
+Tor traffic in Amethyst is routed via the app's Tor settings, so the onion URL works without any extra proxy configuration on the phone.
+
 ## Support
 
 - [Namecoin Forum](https://forum.namecoin.org/)
