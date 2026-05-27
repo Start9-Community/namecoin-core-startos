@@ -26,6 +26,13 @@ export const seedFiles = sdk.setupOnInit(async (effects, kind) => {
       // Workaround for namecoin/namecoin-core#593: upstream nc30.x ships
       // Bitcoin's DNS seeds for mainnet, so a fresh node would never find
       // a real Namecoin peer. Pre-seed with known-good addnodes.
+      //
+      // IMPORTANT: these manual peers are bootstrap-only. Once the node has
+      // organic peers (peer-relay populates addrman after a few minutes),
+      // the user should run the "Graduate From Bootstrap Peers" action and
+      // restart Namecoin. Manual peers are exempt from misbehavior
+      // penalties; leaving them set permanently lets one bad peer stall
+      // the entire sync. See defaultPeers.ts for the failure analysis.
       connectpeer: {
         selection: 'addnode',
         value: {
