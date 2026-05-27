@@ -271,6 +271,21 @@ const dict = {
   'The manual peer list is already empty.': 1974,
   'Bootstrap Peers Removed': 1975,
   'Bootstrap peers removed from namecoin.conf. Restart Namecoin to apply.': 1976,
+  // actions/nameLookup.ts
+  'Name Lookup': 2100,
+  'Name to Look Up': 2101,
+  'A Namecoin name in namespace/name form. Examples: d/wikileaks (domain), id/alice (identity), dd/testls (DNS sub-namespace).':
+    2102,
+  'Must be namespace/name (lowercase namespace, alphanumerics/dot/underscore/dash in the name).':
+    2103,
+  'Resolve a Namecoin name against the running node and display the JSON result. Equivalent to `namecoin-cli name_show <name>`.':
+    2104,
+  'Name Lookup Result': 2105,
+  'Found: ${name}': 2106,
+  'JSON Result': 2107,
+  'Name Lookup Failed': 2108,
+  'Lookup of ${name} failed.': 2109,
+  Error: 2110,
 
   // Common
   Configuration: 1800,
