@@ -10,6 +10,7 @@ import { deleteRpcAuth } from './deleteRpcAuth'
 import { deleteTxIndex } from './deleteTxIndex'
 import { generateRpcUser } from './generateRpcUser'
 import { generateRpcUserDependent } from './generateRpcUserDependent'
+import { graduateFromBootstrap } from './graduateFromBootstrap'
 import { reindexBlockchain } from './reindexBlockchain'
 import { reindexChainstate } from './reindexChainstate'
 import { runtimeInfo } from './runtimeInfo'
@@ -23,6 +24,7 @@ export const actions = sdk.Actions.of()
   .addAction(deleteTxIndex)
   .addAction(generateRpcUser)
   .addAction(generateRpcUserDependent)
+  .addAction(graduateFromBootstrap)
   .addAction(otherConfig)
   .addAction(reindexBlockchain)
   .addAction(reindexChainstate)

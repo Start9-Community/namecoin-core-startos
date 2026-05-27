@@ -263,6 +263,15 @@ const dict = {
   'Tor is not running': 1958,
   'Tor is not installed': 1959,
 
+  // actions/graduateFromBootstrap.ts
+  'Graduate From Bootstrap Peers': 1970,
+  'Remove the install-time addnode list once the node has learned enough organic peers. Manual peers are exempt from misbehavior penalties; keeping them long-term lets a single bad peer stall sync. Restart the package after running this action.': 1971,
+  'You must restart Namecoin after running this action for the new peer config to take effect.': 1972,
+  'Already Graduated': 1973,
+  'The manual peer list is already empty.': 1974,
+  'Bootstrap Peers Removed': 1975,
+  'Bootstrap peers removed from namecoin.conf. Restart Namecoin to apply.': 1976,
+
   // Common
   Configuration: 1800,
   Default: 2000,
