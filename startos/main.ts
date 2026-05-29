@@ -150,11 +150,45 @@ export const main = sdk.setupMain(async ({ effects }) => {
             const info: GetBlockchainInfo = JSON.parse(res.stdout)
 
             if (info.initialblockdownload) {
+              // Headers-first sync: namecoind downloads and validates the
+              // entire header chain before requesting any block bodies. While
+              // that is happening, info.blocks stays at 0 and
+              // info.verificationprogress is ~0, which would otherwise read
+              // as the (correct but uninformative) "Syncing blocks...0.00%".
+              // Surface the actual phase so users can tell pre-block-download
+              // progress (headers ticking up) from a stalled node.
+              const headers = info.headers
+              const blocks = info.blocks
+
+              if (headers === 0) {
+                return {
+                  message: i18n(
+                    'Connecting to peers and downloading headers\u2026',
+                  ),
+                  result: 'loading',
+                }
+              }
+
+              if (blocks === 0) {
+                return {
+                  message: i18n(
+                    'Syncing headers\u2026 ${headers} downloaded',
+                    { headers: String(headers) },
+                  ),
+                  result: 'loading',
+                }
+              }
+
               const percentage = (info.verificationprogress * 100).toFixed(2)
               return {
-                message: i18n('Syncing blocks...${percentage}%', {
-                  percentage,
-                }),
+                message: i18n(
+                  'Syncing blocks... ${blocks} / ${headers} (${percentage}%)',
+                  {
+                    blocks: String(blocks),
+                    headers: String(headers),
+                    percentage,
+                  },
+                ),
                 result: 'loading',
               }
             }
