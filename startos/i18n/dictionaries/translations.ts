@@ -287,6 +287,14 @@ export default {
     2108: 'Name Lookup Failed',
     2109: 'Lookup of ${name} failed.',
     2110: 'Error',
+    2400: 'Configure for ElectrumX',
+    2401: 'Prepare Namecoin Core to back a local ElectrumX server: generate an RPC user for ElectrumX, disable pruning (prune=0), and enable the transaction index (txindex=true). The generated password is shown once — copy it into ElectrumX immediately. If pruning was previously enabled, a full blockchain reindex will be scheduled on next start.',
+    2402: 'Disabling pruning requires a full (non-pruned) chain. If pruning was previously enabled, Namecoin Core will reindex from genesis on next start — this can take hours and needs significantly more disk space (~10–15 GB chain + ~5 GB ElectrumX index).',
+    2403: 'RPC username ElectrumX will use to connect to Namecoin Core. Defaults to "electrumx".',
+    2404: 'Namecoin Core configured for ElectrumX',
+    2405: 'RPC user "${username}" created, pruning disabled, transaction index enabled. Copy the password below into ElectrumX\'s "Namecoin Core Connection" action. The password is shown ONCE — if lost you will need to create a new RPC user. ${reindexNote}',
+    2406: 'Pruning was previously enabled; Namecoin Core will perform a full blockchain reindex on next start.',
+    2407: 'No reindex required.',
   } satisfies LangDict,
   de_DE: {
     // main.ts
@@ -574,6 +582,14 @@ export default {
     2108: 'Name Lookup Failed',
     2109: 'Lookup of ${name} failed.',
     2110: 'Error',
+    2400: 'Configure for ElectrumX',
+    2401: 'Prepare Namecoin Core to back a local ElectrumX server: generate an RPC user for ElectrumX, disable pruning (prune=0), and enable the transaction index (txindex=true). The generated password is shown once — copy it into ElectrumX immediately. If pruning was previously enabled, a full blockchain reindex will be scheduled on next start.',
+    2402: 'Disabling pruning requires a full (non-pruned) chain. If pruning was previously enabled, Namecoin Core will reindex from genesis on next start — this can take hours and needs significantly more disk space (~10–15 GB chain + ~5 GB ElectrumX index).',
+    2403: 'RPC username ElectrumX will use to connect to Namecoin Core. Defaults to "electrumx".',
+    2404: 'Namecoin Core configured for ElectrumX',
+    2405: 'RPC user "${username}" created, pruning disabled, transaction index enabled. Copy the password below into ElectrumX\'s "Namecoin Core Connection" action. The password is shown ONCE — if lost you will need to create a new RPC user. ${reindexNote}',
+    2406: 'Pruning was previously enabled; Namecoin Core will perform a full blockchain reindex on next start.',
+    2407: 'No reindex required.',
   } satisfies LangDict,
   pl_PL: {
     // main.ts
@@ -861,6 +877,14 @@ export default {
     2108: 'Name Lookup Failed',
     2109: 'Lookup of ${name} failed.',
     2110: 'Error',
+    2400: 'Configure for ElectrumX',
+    2401: 'Prepare Namecoin Core to back a local ElectrumX server: generate an RPC user for ElectrumX, disable pruning (prune=0), and enable the transaction index (txindex=true). The generated password is shown once — copy it into ElectrumX immediately. If pruning was previously enabled, a full blockchain reindex will be scheduled on next start.',
+    2402: 'Disabling pruning requires a full (non-pruned) chain. If pruning was previously enabled, Namecoin Core will reindex from genesis on next start — this can take hours and needs significantly more disk space (~10–15 GB chain + ~5 GB ElectrumX index).',
+    2403: 'RPC username ElectrumX will use to connect to Namecoin Core. Defaults to "electrumx".',
+    2404: 'Namecoin Core configured for ElectrumX',
+    2405: 'RPC user "${username}" created, pruning disabled, transaction index enabled. Copy the password below into ElectrumX\'s "Namecoin Core Connection" action. The password is shown ONCE — if lost you will need to create a new RPC user. ${reindexNote}',
+    2406: 'Pruning was previously enabled; Namecoin Core will perform a full blockchain reindex on next start.',
+    2407: 'No reindex required.',
   } satisfies LangDict,
   fr_FR: {
     // main.ts
@@ -1148,5 +1172,13 @@ export default {
     2108: 'Name Lookup Failed',
     2109: 'Lookup of ${name} failed.',
     2110: 'Error',
+    2400: 'Configure for ElectrumX',
+    2401: 'Prepare Namecoin Core to back a local ElectrumX server: generate an RPC user for ElectrumX, disable pruning (prune=0), and enable the transaction index (txindex=true). The generated password is shown once — copy it into ElectrumX immediately. If pruning was previously enabled, a full blockchain reindex will be scheduled on next start.',
+    2402: 'Disabling pruning requires a full (non-pruned) chain. If pruning was previously enabled, Namecoin Core will reindex from genesis on next start — this can take hours and needs significantly more disk space (~10–15 GB chain + ~5 GB ElectrumX index).',
+    2403: 'RPC username ElectrumX will use to connect to Namecoin Core. Defaults to "electrumx".',
+    2404: 'Namecoin Core configured for ElectrumX',
+    2405: 'RPC user "${username}" created, pruning disabled, transaction index enabled. Copy the password below into ElectrumX\'s "Namecoin Core Connection" action. The password is shown ONCE — if lost you will need to create a new RPC user. ${reindexNote}',
+    2406: 'Pruning was previously enabled; Namecoin Core will perform a full blockchain reindex on next start.',
+    2407: 'No reindex required.',
   } satisfies LangDict,
 }
