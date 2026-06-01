@@ -44,7 +44,40 @@ Settings are edited through **Actions** (grouped under **Configuration**), not a
 - **Peer Settings** — onlynet, V2 transport, connect/add nodes, max connections.
 - **Mempool Settings** and **RPC Settings** — mempool and RPC tuning.
 
-By default the node runs as a full archival node. On a small disk, enable **Pruning** under Other Settings to cap blockchain storage — note that pruning is incompatible with the transaction index, which will be turned off automatically.
+By default the node runs as a full archival node. On a small disk, enable **Pruning** under Other Settings to cap blockchain storage — note that pruning is incompatible with the transaction index, which will be turned off automatically. If you intend to run ElectrumX or any wallet that needs historical transactions, **leave pruning off and turn `txindex` on**.
+
+## Bootstrap peers and the "Graduate" workflow ⚠️
+
+This is the most important quirk in the current package — read it before you assume sync is broken.
+
+### Why there's a default peer list
+
+Upstream Namecoin Core (nc30.x) inherited Bitcoin's `vSeeds` instead of Namecoin's during the bitcoin-30.x merge (tracked as [namecoin/namecoin-core#593](https://github.com/namecoin/namecoin-core/pull/593)). The DNS-seed thread queries Bitcoin's seeds, never finds a Namecoin peer, and a fresh node sits at 0 connections forever.
+
+Of the six Namecoin mainnet DNS seeds, only **two** currently resolve at all (`dnsseed.nmc.testls.space`, `namecoin.seed.cypherstack.com`). To work around this, the package seeds a curated list of known-good Namecoin nodes as `addnode=` entries in `namecoin.conf` on install. A fresh sideload now connects to ~8 peers within ~9 seconds and starts syncing immediately.
+
+### Why you should "graduate" once sync is moving
+
+`addnode=` peers are exempt from misbehavior disconnect/ban — namecoind logs "not punishing manually connected peer" and keeps them connected even when they spam junk. A single broken or malicious peer in the list can saturate the message-handler thread and **stall the entire sync** with the appearance of "stuck at X%" but no obvious error.
+
+Observed during testing: sync stalled at ~55% with one peer spamming ~20 misbehavior warnings/sec. Removing manual peers individually was whack-a-mole — a different bad peer rotated into the slot. The clean fix is to drop the whole manual peer list once the address manager is warm with peers learned via gossip.
+
+Switching `addnode=` → `connect=` does **not** help — both land in the "manual" bucket.
+
+### When and how to graduate
+
+Run **Actions → Graduate From Bootstrap Peers** once the node has:
+
+- ≥ 5 organic outbound connections, and
+- some blocks verified (i.e. address manager is warm).
+
+The action refuses to run otherwise so you can't orphan a node that's still in earliest bootstrap. It edits `namecoin.conf` only; you must **restart the package** afterwards because namecoind reads `addnode=` entries only at startup.
+
+After graduating, the node finds its own peers via the standard gossip path. The Runtime Information action will show 10 outbound on its own.
+
+### Inbound connections
+
+Don't be surprised if **Connections** shows `0 in / N out` — StartOS doesn't expose port 8334 publicly by default, so no Namecoin peer can reach your node from the outside. Outbound peers are all you need to sync and use the node. Enable inbound by exposing the Peer interface publicly in **Service Interfaces → Peer** if you want to help the network.
 
 ## Backups
 
