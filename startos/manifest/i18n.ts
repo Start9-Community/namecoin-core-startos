@@ -8,7 +8,7 @@ export const short = {
 
 export const long = {
   en_US:
-    'Namecoin is an innovative payment network and a new kind of money. Namecoin uses peer-to-peer technology to operate with no central authority or banks; managing transactions and the issuing of namecoins is carried out collectively by the network. Namecoin is open-source; its design is public, nobody owns or controls Namecoin and everyone can take part. Through many of its unique properties, Namecoin allows exciting uses that could not be covered by any previous payment system.',
+    'Namecoin is an experimental open-source technology which improves decentralization, security, censorship resistance, privacy, and speed of certain components of the Internet infrastructure such as DNS and identities.\n\n(For the technically minded, Namecoin is a key/value pair registration and transfer system based on the Bitcoin technology.)\n\nBitcoin frees money – Namecoin frees DNS, identities, and other technologies.',
   es_ES:
     'Namecoin es una red de pagos innovadora y un nuevo tipo de dinero. Namecoin utiliza tecnología peer-to-peer para operar sin autoridad central ni bancos; la gestión de transacciones y la emisión de namecoins se lleva a cabo colectivamente por la red. Namecoin es de código abierto; su diseño es público, nadie posee ni controla Namecoin y todos pueden participar. A través de sus muchas propiedades únicas, Namecoin permite usos emocionantes que no podrían ser cubiertos por ningún sistema de pago anterior.',
   de_DE:
