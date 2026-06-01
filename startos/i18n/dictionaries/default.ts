@@ -8,6 +8,9 @@ const dict = {
   'Namecoin is fully synced': 4,
   'Namecoin is starting…': 5,
   'Syncing blocks...${percentage}%': 6,
+  'Connecting to peers and downloading headers…': 2200,
+  'Syncing headers… ${headers} downloaded': 2201,
+  'Syncing blocks... ${blocks} / ${headers} (${percentage}%)': 2202,
   'BIP9 Status': 2300,
   'BIP9 Bit': 2301,
   'BIP9 Start Time': 2302,
@@ -296,6 +299,21 @@ const dict = {
   'Name Lookup Failed': 2108,
   'Lookup of ${name} failed.': 2109,
   Error: 2110,
+
+  // actions/configureForElectrumx.ts
+  'Configure for ElectrumX': 2400,
+  'Prepare Namecoin Core to back a local ElectrumX server: generate an RPC user for ElectrumX, disable pruning (prune=0), and enable the transaction index (txindex=true). The generated password is shown once — copy it into ElectrumX immediately. If pruning was previously enabled, a full blockchain reindex will be scheduled on next start.':
+    2401,
+  'Disabling pruning requires a full (non-pruned) chain. If pruning was previously enabled, Namecoin Core will reindex from genesis on next start — this can take hours and needs significantly more disk space (~10–15 GB chain + ~5 GB ElectrumX index).':
+    2402,
+  'RPC username ElectrumX will use to connect to Namecoin Core. Defaults to "electrumx".':
+    2403,
+  'Namecoin Core configured for ElectrumX': 2404,
+  'RPC user "${username}" created, pruning disabled, transaction index enabled. Copy the password below into ElectrumX\'s "Namecoin Core Connection" action. The password is shown ONCE — if lost you will need to create a new RPC user. ${reindexNote}':
+    2405,
+  'Pruning was previously enabled; Namecoin Core will perform a full blockchain reindex on next start.':
+    2406,
+  'No reindex required.': 2407,
 
   // Common
   Configuration: 1800,

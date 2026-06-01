@@ -4,6 +4,7 @@ import { mempoolConfig } from './config/mempool'
 import { otherConfig } from './config/other'
 import { peerConfig } from './config/peers'
 import { rpcConfig } from './config/rpc'
+import { configureForElectrumx } from './configureForElectrumx'
 import { deleteCoinstatsIndex } from './deleteCoinstatsIndex'
 import { deletePeers } from './deletePeers'
 import { deleteRpcAuth } from './deleteRpcAuth'
@@ -19,6 +20,7 @@ export const actions = sdk.Actions.of()
   .addAction(mempoolConfig)
   .addAction(peerConfig)
   .addAction(rpcConfig)
+  .addAction(configureForElectrumx)
   .addAction(deleteCoinstatsIndex)
   .addAction(deletePeers)
   .addAction(deleteRpcAuth)
