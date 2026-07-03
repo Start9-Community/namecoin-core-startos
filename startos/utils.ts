@@ -1,5 +1,11 @@
 import { sdk } from './sdk'
 
+// Host ids (the `sdk.MultiHost.of` groups) — distinct from the interface ids
+// exported on them.
+export const rpcHostId = 'rpc'
+export const peerHostId = 'peer'
+export const zmqHostId = 'zmq'
+
 export const rpcInterfaceId = 'rpc'
 export const peerInterfaceId = 'peer'
 export const zmqInterfaceId = 'zmq'

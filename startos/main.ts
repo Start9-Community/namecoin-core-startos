@@ -53,7 +53,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
     await storeJson.merge(effects, { reindexChainstate: false })
   }
 
-  const namecoindSub = await sdk.SubContainer.of(
+  const namecoindSub = await sdk.SubContainer.eager(
     effects,
     { imageId: 'namecoind' },
     namecoinMounts,
