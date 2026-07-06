@@ -1,9 +1,11 @@
 import { access, rm } from 'fs/promises'
+import { socksHostId, socksPort } from 'tor-startos/startos/utils'
 import { namecoinConfFile } from './fileModels/namecoin.conf'
 import { storeJson } from './fileModels/store.json'
 import { i18n } from './i18n'
 import { sdk } from './sdk'
 import {
+  bridgeAddress,
   GetBlockchainInfo,
   namecoinCliArgs,
   namecoinMounts,
@@ -31,19 +33,28 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
   const { reindexBlockchain, reindexChainstate } = store
 
-  // get Tor container IP (restarts Namecoin if IP changes, needed for -onion= flag)
-  const torIp = await sdk.getContainerIp(effects, { packageId: 'tor' }).const()
+  // Tor SOCKS over the bridge. The mapped value only changes when the address
+  // itself does — with the 9050 fallback it stays constant across tor
+  // install/update/uninstall, so this .const() never restarts Namecoin unless
+  // tor lands on a different port (then one healing restart). A dead bridge
+  // address is just connection-refused, so -onion is always safe to pass.
+  const torSocks = await bridgeAddress(effects, {
+    packageId: 'tor',
+    hostId: socksHostId,
+    internalPort: socksPort,
+    fallbackPort: socksPort,
+  }).const()
 
-  // track Tor running status dynamically for health check (no restart needed)
+  // track Tor install/run state dynamically for the health check (no restart)
+  let torInstalled = false
   let torRunning = false
-  if (torIp) {
-    sdk.getStatus(effects, { packageId: 'tor' }).onChange((status) => {
-      torRunning = status?.desired.main === 'running'
-      return { cancel: false }
-    })
-  }
+  sdk.getStatus(effects, { packageId: 'tor' }).onChange((status) => {
+    torInstalled = status !== null
+    torRunning = status?.desired.main === 'running'
+    return { cancel: false }
+  })
 
-  const namecoinArgs: string[] = torIp ? [`-onion=${torIp}:9050`] : []
+  const namecoinArgs: string[] = [`-onion=${torSocks}`]
 
   if (reindexBlockchain) {
     namecoinArgs.push('-reindex')
@@ -233,7 +244,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
     ready: {
       display: 'Tor',
       fn: () => {
-        if (!torIp) {
+        if (!torInstalled) {
           return { result: 'disabled', message: i18n('Tor is not installed') }
         }
         if (!torRunning) {
