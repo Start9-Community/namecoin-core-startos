@@ -182,10 +182,9 @@ export const main = sdk.setupMain(async ({ effects }) => {
 
               if (blocks === 0) {
                 return {
-                  message: i18n(
-                    'Syncing headers\u2026 ${headers} downloaded',
-                    { headers: String(headers) },
-                  ),
+                  message: i18n('Syncing headers\u2026 ${headers} downloaded', {
+                    headers: String(headers),
+                  }),
                   result: 'loading',
                 }
               }
