@@ -36,8 +36,8 @@ To learn how to build and package a StartOS service, see the [Packaging Guide](h
 
 | Property      | Value                                                                        |
 | ------------- | ---------------------------------------------------------------------------- |
-| Image         | Built from source by `Dockerfile` (CMake build of `nc<VERSION>` tag)         |
-| Upstream      | `github.com/namecoin/namecoin-core` @ `nc30.2`                               |
+| Image         | Built from source by `Dockerfile` (CMake build of the pinned upstream tag)   |
+| Upstream      | `github.com/namecoin/namecoin-core`                                          |
 | Architectures | x86_64, aarch64                                                              |
 | Command       | `namecoind`                                                                  |
 | Binaries      | `namecoind`, `namecoin-cli`, `namecoin-tx`                                   |
@@ -143,13 +143,13 @@ This preserves the wallet, registered names, and `namecoin.conf` while keeping b
 2. **RPC auth is cookie-first.** There is no fixed RPC username/password; use Generate RPC User Credentials for remote access.
 3. **Fixed ports and binds** are enforced so StartOS networking and dependent services work reliably.
 4. **Built from source**, not from an upstream-published binary — there is no GPG release-signer quorum (Namecoin does not publish one); trust is anchored on the pinned git tag.
-5. **DNS seeds are patched at build time.** Upstream `nc30.2`'s mainnet chain params ship Bitcoin's DNS seeds and an empty fixed-seed list, so a stock build finds no Namecoin peers and never syncs. The `Dockerfile` rewrites them to the Namecoin community seeder `dnsseed.nmc.testls.space` (a guarded `sed` that fails the build if upstream renames the lines). See [UPDATING.md](./UPDATING.md).
+5. **DNS seeds are patched at build time.** Upstream's mainnet chain params ship Bitcoin's DNS seeds and an empty fixed-seed list, so a stock build finds no Namecoin peers and never syncs. The `Dockerfile` rewrites them to the Namecoin community seeder `dnsseed.nmc.testls.space` (a guarded `sed` that fails the build if upstream renames the lines). See [UPDATING.md](./UPDATING.md).
 
 ---
 
 ## What Is Unchanged from Upstream
 
-Namecoin Core's consensus rules, wallet, and RPC surface (including all `name_*` operations) are stock `nc30.2`. This package only wraps configuration, networking, health, backup, and lifecycle management around the upstream node — plus the build-time DNS-seed fix noted above (a peer-discovery workaround, not a consensus change).
+Namecoin Core's consensus rules, wallet, and RPC surface (including all `name_*` operations) are stock upstream. This package only wraps configuration, networking, health, backup, and lifecycle management around the upstream node — plus the build-time DNS-seed fix noted above (a peer-discovery workaround, not a consensus change).
 
 ---
 
@@ -163,7 +163,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for build instructions and development wo
 
 ```yaml
 package_id: namecoind
-image: built-from-source (github.com/namecoin/namecoin-core @ nc30.2, CMake)
+image: built-from-source (github.com/namecoin/namecoin-core, CMake)
 architectures: [x86_64, aarch64]
 volumes:
   main: /root/.namecoin

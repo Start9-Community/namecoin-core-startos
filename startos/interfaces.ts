@@ -1,11 +1,14 @@
 import { namecoinConfFile } from './fileModels/namecoin.conf'
 import { sdk } from './sdk'
 import {
+  peerHostId,
   peerInterfaceId,
   peerPortExternal,
   peerPortInternal,
+  rpcHostId,
   rpcInterfaceId,
   rpcPort,
+  zmqHostId,
   zmqInterfaceId,
   zmqPortBlock,
 } from './utils'
@@ -17,7 +20,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   if (!namecoinConf) return []
 
   // RPC
-  const rpcMulti = sdk.MultiHost.of(effects, 'rpc')
+  const rpcMulti = sdk.MultiHost.of(effects, rpcHostId)
   const rpcMultiOrigin = await rpcMulti.bindPort(rpcPort, {
     protocol: 'http',
     preferredExternalPort: rpcPort,
@@ -38,7 +41,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   const receipts = [rpcReceipt]
 
   // Peer
-  const peerMulti = sdk.MultiHost.of(effects, 'peer')
+  const peerMulti = sdk.MultiHost.of(effects, peerHostId)
   const peerMultiOrigin = await peerMulti.bindPort(peerPortInternal, {
     protocol: null,
     preferredExternalPort: peerPortExternal,
@@ -64,7 +67,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
 
   // ZMQ (conditional)
   if (namecoinConf.zmqEnabled) {
-    const zmqMulti = sdk.MultiHost.of(effects, 'zmq')
+    const zmqMulti = sdk.MultiHost.of(effects, zmqHostId)
     const zmqMultiOrigin = await zmqMulti.bindPort(zmqPortBlock, {
       preferredExternalPort: zmqPortBlock,
       addSsl: null,
