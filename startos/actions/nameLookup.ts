@@ -68,8 +68,7 @@ export const nameLookup = sdk.Action.withInput(
       { imageId: 'namecoind' },
       namecoinMounts,
       'name-lookup',
-      async (subc) =>
-        subc.exec([...namecoinCliArgs(), 'name_show', name]),
+      async (subc) => subc.exec([...namecoinCliArgs(), 'name_show', name]),
     )
 
     const stdout = (result.stdout as string) || ''

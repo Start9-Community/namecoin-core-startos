@@ -254,7 +254,9 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       type: 'single',
       name: i18n('BIP9 Since'),
       value: String(since),
-      description: i18n('height of the first block to which the status applies'),
+      description: i18n(
+        'height of the first block to which the status applies',
+      ),
       copyable: false,
       masked: false,
       qr: false,
@@ -262,9 +264,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
   ]
 }
 
-function getBip9StatisticsFlat(
-  statistics: Bip9Stats,
-): T.ActionResultMember[] {
+function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
   const { period, threshold, elapsed, count, possible } = statistics
 
   return [
