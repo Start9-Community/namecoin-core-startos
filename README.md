@@ -34,13 +34,13 @@ To learn how to build and package a StartOS service, see the [Packaging Guide](h
 
 ## Image and Container Runtime
 
-| Property      | Value                                                                        |
-| ------------- | ---------------------------------------------------------------------------- |
-| Image         | Built from source by `Dockerfile` (CMake build of the pinned upstream tag)   |
-| Upstream      | `github.com/namecoin/namecoin-core`                                          |
-| Architectures | x86_64, aarch64                                                              |
-| Command       | `namecoind`                                                                  |
-| Binaries      | `namecoind`, `namecoin-cli`, `namecoin-tx`                                   |
+| Property      | Value                                                                      |
+| ------------- | -------------------------------------------------------------------------- |
+| Image         | Built from source by `Dockerfile` (CMake build of the pinned upstream tag) |
+| Upstream      | `github.com/namecoin/namecoin-core`                                        |
+| Architectures | x86_64, aarch64                                                            |
+| Command       | `namecoind`                                                                |
+| Binaries      | `namecoind`, `namecoin-cli`, `namecoin-tx`                                 |
 
 The image is compiled from a pinned upstream git tag rather than pulled from a registry; the upstream version is set by the `VERSION` build-arg in `startos/manifest/index.ts`.
 
@@ -48,9 +48,9 @@ The image is compiled from a pinned upstream git tag rather than pulled from a r
 
 ## Volume and Data Layout
 
-| Volume | Mount Point      | Purpose                                          |
-| ------ | ---------------- | ------------------------------------------------ |
-| `main` | `/root/.namecoin`| Blockchain, chainstate, wallet, and `namecoin.conf` |
+| Volume | Mount Point       | Purpose                                             |
+| ------ | ----------------- | --------------------------------------------------- |
+| `main` | `/root/.namecoin` | Blockchain, chainstate, wallet, and `namecoin.conf` |
 
 `namecoin.conf` is generated and managed by StartOS from the in-app settings — see [Configuration Management](#configuration-management). Do not edit it by hand.
 
@@ -66,12 +66,12 @@ On install, StartOS seeds `namecoin.conf` with sensible defaults (cookie-based R
 
 There is no monolithic config screen. Settings are edited through grouped **Actions** that write to `namecoin.conf`:
 
-| Action          | Group           | Covers                                                                 |
-| --------------- | --------------- | ---------------------------------------------------------------------- |
-| RPC Settings    | Configuration   | RPC server timeout, threads, work queue                                |
-| Peer Settings   | Configuration   | Onlynet, V2 transport, connect/add nodes, max connections              |
-| Mempool Settings| Configuration   | Persist mempool, size, expiry, OP_RETURN relay, blocks-only            |
-| Other Settings  | Configuration   | Pruning, txindex, dbcache/dbbatch, block filters, wallet, ZeroMQ       |
+| Action           | Group         | Covers                                                           |
+| ---------------- | ------------- | ---------------------------------------------------------------- |
+| RPC Settings     | Configuration | RPC server timeout, threads, work queue                          |
+| Peer Settings    | Configuration | Onlynet, V2 transport, connect/add nodes, max connections        |
+| Mempool Settings | Configuration | Persist mempool, size, expiry, OP_RETURN relay, blocks-only      |
+| Other Settings   | Configuration | Pruning, txindex, dbcache/dbbatch, block filters, wallet, ZeroMQ |
 
 RPC authentication uses Namecoin Core's auto-generated `.cookie` file, so on-box services can reach the node without a configured password. For remote clients (e.g. a wallet), use the **Generate RPC User Credentials** action to add an `rpcauth` entry.
 
@@ -81,10 +81,10 @@ Enforced values (set by StartOS, not user-editable): `rpcbind`/`rpcallowip`, `rp
 
 ## Network Access and Interfaces
 
-| Interface | Internal Port | External Port | Type | Purpose                          |
-| --------- | ------------- | ------------- | ---- | -------------------------------- |
-| RPC       | 8336          | 8336          | api  | JSON-RPC commands                |
-| Peer      | 58334         | 8334          | p2p  | Namecoin P2P network connections |
+| Interface | Internal Port | External Port | Type | Purpose                                              |
+| --------- | ------------- | ------------- | ---- | ---------------------------------------------------- |
+| RPC       | 8336          | 8336          | api  | JSON-RPC commands                                    |
+| Peer      | 58334         | 8334          | p2p  | Namecoin P2P network connections                     |
 | ZeroMQ    | 28336         | 28336         | api  | Block/tx notifications (only when ZeroMQ is enabled) |
 
 **Access methods:** LAN IP, `<hostname>.local`, Tor `.onion` address, and custom domains (if configured).
@@ -93,16 +93,16 @@ Enforced values (set by StartOS, not user-editable): `rpcbind`/`rpcallowip`, `rp
 
 ## Actions (StartOS UI)
 
-| Action                        | Group                  | Notes                                                    |
-| ----------------------------- | ---------------------- | -------------------------------------------------------- |
-| Runtime Information           | —                      | Connections, block height, sync progress, softforks      |
-| Generate RPC User Credentials | RPC Users              | Adds an `rpcauth` entry for remote clients               |
-| Delete RPC Users              | RPC Users              | Removes `rpcauth` entries                                |
-| Reindex Blockchain            | Reindex                | Rebuilds block + chainstate databases from genesis       |
-| Reindex Chainstate            | Reindex                | Rebuilds chainstate only (hidden when pruned)            |
-| Delete Peer List              | Delete Corrupted Files | Removes `peers.dat`                                      |
-| Delete Transaction Index      | Delete Corrupted Files | Removes the txindex                                      |
-| Delete Coinstats Index        | Delete Corrupted Files | Removes the coinstats index                              |
+| Action                        | Group                  | Notes                                               |
+| ----------------------------- | ---------------------- | --------------------------------------------------- |
+| Runtime Information           | —                      | Connections, block height, sync progress, softforks |
+| Generate RPC User Credentials | RPC Users              | Adds an `rpcauth` entry for remote clients          |
+| Delete RPC Users              | RPC Users              | Removes `rpcauth` entries                           |
+| Reindex Blockchain            | Reindex                | Rebuilds block + chainstate databases from genesis  |
+| Reindex Chainstate            | Reindex                | Rebuilds chainstate only (hidden when pruned)       |
+| Delete Peer List              | Delete Corrupted Files | Removes `peers.dat`                                 |
+| Delete Transaction Index      | Delete Corrupted Files | Removes the txindex                                 |
+| Delete Coinstats Index        | Delete Corrupted Files | Removes the coinstats index                         |
 
 Two further actions — Auto-Configure and Create RPC Credentials — are hidden and exist only for use by dependent services.
 
@@ -120,19 +120,19 @@ This preserves the wallet, registered names, and `namecoin.conf` while keeping b
 
 ## Health Checks
 
-| Check          | Method                              | Meaning                                                  |
-| -------------- | ----------------------------------- | -------------------------------------------------------- |
-| RPC            | Cookie file present + port 8336     | The node's RPC interface is up                           |
-| Blockchain Sync| `getblockchaininfo` polling         | Reports IBD progress, then "fully synced"                |
-| Tor            | Tor install/run + onlynet/externalip| Inbound/outbound onion connectivity status               |
-| Clearnet       | onlynet/externalip                  | Inbound/outbound clearnet connectivity status            |
+| Check           | Method                               | Meaning                                       |
+| --------------- | ------------------------------------ | --------------------------------------------- |
+| RPC             | Cookie file present + port 8336      | The node's RPC interface is up                |
+| Blockchain Sync | `getblockchaininfo` polling          | Reports IBD progress, then "fully synced"     |
+| Tor             | Tor install/run + onlynet/externalip | Inbound/outbound onion connectivity status    |
+| Clearnet        | onlynet/externalip                   | Inbound/outbound clearnet connectivity status |
 
 ---
 
 ## Dependencies
 
-| Dependency | Required? | Why                                                                 |
-| ---------- | --------- | ------------------------------------------------------------------- |
+| Dependency | Required? | Why                                                                                         |
+| ---------- | --------- | ------------------------------------------------------------------------------------------- |
 | Tor        | Optional  | Needed for `.onion` peer connectivity, `onlynet=onion`, or when a Tor address is requested. |
 
 ---
