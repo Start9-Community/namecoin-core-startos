@@ -1,16 +1,18 @@
 <p align="center">
-  <img src="icon.svg" alt="Namecoin Core Logo" width="21%">
+  <img src="icon.png" alt="Namecoin Core Logo" width="21%">
 </p>
 
 # Namecoin Core on StartOS
 
-> **Upstream repo:** <https://github.com/namecoin/namecoin-core>
+> Everything not listed in this document should behave the same as upstream
+> Namecoin Core. If a feature, setting, or behavior is not mentioned here, the
+> upstream documentation is accurate and fully applicable — see the
+> Documentation section of `instructions.md` for links.
 
-[Namecoin](https://www.namecoin.org/) is the first fork of Bitcoin: a decentralized key/value store on its own blockchain, used for censorship-resistant `.bit` domains, identity records, and the NMC cryptocurrency. Namecoin Core is the reference full node and wallet, built on the Bitcoin Core codebase. This package runs a full Namecoin node on StartOS.
+[Namecoin Core](https://github.com/namecoin/namecoin-core) is the reference full node for Namecoin, a merge-mined blockchain that stores names as well as coins. This package builds it from source, manages its configuration file, and works around an upstream bug that would otherwise leave a fresh node unable to find any peers.
 
-## Getting Started
-
-To learn how to build and package a StartOS service, see the [Packaging Guide](https://docs.start9.com/packaging).
+- **Upstream repo:** <https://github.com/namecoin/namecoin-core>
+- **Wrapper repo:** <https://github.com/Start9-Community/namecoin-core-startos>
 
 ---
 
@@ -18,169 +20,289 @@ To learn how to build and package a StartOS service, see the [Packaging Guide](h
 
 - [Image and Container Runtime](#image-and-container-runtime)
 - [Volume and Data Layout](#volume-and-data-layout)
-- [Installation and First-Run Flow](#installation-and-first-run-flow)
-- [Configuration Management](#configuration-management)
-- [Network Access and Interfaces](#network-access-and-interfaces)
-- [Actions (StartOS UI)](#actions-startos-ui)
-- [Backups and Restore](#backups-and-restore)
-- [Health Checks](#health-checks)
+- [File Models](#file-models)
 - [Dependencies](#dependencies)
+- [Network Access and Interfaces](#network-access-and-interfaces)
+- [Installation and First-Run Flow](#installation-and-first-run-flow)
+- [Actions](#actions)
+- [Tasks](#tasks)
+- [Health Checks](#health-checks)
+- [Backups and Restore](#backups-and-restore)
 - [Limitations and Differences](#limitations-and-differences)
-- [What Is Unchanged from Upstream](#what-is-unchanged-from-upstream)
-- [Contributing](#contributing)
 - [Quick Reference for AI Consumers](#quick-reference-for-ai-consumers)
 
 ---
 
 ## Image and Container Runtime
 
-| Property      | Value                                                                      |
-| ------------- | -------------------------------------------------------------------------- |
-| Image         | Built from source by `Dockerfile` (CMake build of the pinned upstream tag) |
-| Upstream      | `github.com/namecoin/namecoin-core`                                        |
-| Architectures | x86_64, aarch64                                                            |
-| Command       | `namecoind`                                                                |
-| Binaries      | `namecoind`, `namecoin-cli`, `namecoin-tx`                                 |
+One image, **built from upstream source** rather than pulled.
 
-The image is compiled from a pinned upstream git tag rather than pulled from a registry; the upstream version is set by the `VERSION` build-arg in `startos/manifest/index.ts`.
+| Property      | Value                                          |
+| ------------- | ---------------------------------------------- |
+| Image         | Built from this repo's `Dockerfile`            |
+| Architectures | x86_64, aarch64                                |
+| Command       | `namecoind`, against the managed configuration |
 
----
+| Subcontainer    | Purpose                                  |
+| --------------- | ---------------------------------------- |
+| `namecoind-sub` | The only daemon — the one to `attach` to |
+
+The build clones a pinned upstream tag and compiles it. **There is no release-signer verification** the way Bitcoin Core's packaging does it — Namecoin does not publish a signing quorum, so trust rests on the pinned git ref and GitHub's TLS chain. That is stated here because it is a genuine difference in provenance, not an oversight.
+
+Two oneshots run first:
+
+| Oneshot                | Purpose                                                         |
+| ---------------------- | --------------------------------------------------------------- |
+| `nocow`                | Marks the data directory `nodatacow` on Btrfs                   |
+| `clean-chainstate-old` | Removes a leftover `chainstate.old` from an interrupted reindex |
+
+The daemon is given a **five-minute termination grace period**, because flushing the chainstate on shutdown can take minutes and killing it mid-flush is how a database gets corrupted.
 
 ## Volume and Data Layout
 
-| Volume | Mount Point       | Purpose                                             |
-| ------ | ----------------- | --------------------------------------------------- |
-| `main` | `/root/.namecoin` | Blockchain, chainstate, wallet, and `namecoin.conf` |
+One volume, holding the whole node.
 
-`namecoin.conf` is generated and managed by StartOS from the in-app settings — see [Configuration Management](#configuration-management). Do not edit it by hand.
+| Volume | Mount Point       | Purpose                           |
+| ------ | ----------------- | --------------------------------- |
+| `main` | `/root/.namecoin` | The chain, the config, the wallet |
 
----
+| Path            | Written by  | Holds                                       |
+| --------------- | ----------- | ------------------------------------------- |
+| `blocks/`       | namecoind   | The block files                             |
+| `chainstate/`   | namecoind   | The UTXO set                                |
+| `indexes/`      | namecoind   | The optional transaction and filter indexes |
+| `namecoin.conf` | Actions     | The node configuration                      |
+| `store.json`    | The package | Reindex flags and sync state                |
+| `.cookie`       | namecoind   | The RPC cookie, regenerated every start     |
 
-## Installation and First-Run Flow
+**The cookie file is deleted before every start.** It is a per-run credential, and a stale one left behind by an unclean shutdown would be presented by anything that cached it — so the daemon's readiness check waits for the new one to appear before it will call the node ready.
 
-On install, StartOS seeds `namecoin.conf` with sensible defaults (cookie-based RPC auth, ZeroMQ and compact block filters enabled, pruning auto-selected on small disks) and starts the node. On first run, Namecoin Core downloads and verifies the entire Namecoin blockchain (~15 GB, smaller than Bitcoin's), which can take several hours. Sync progress is reported by the **Blockchain Sync** health check.
+## File Models
 
----
+Two models.
 
-## Configuration Management
+| File            | Format | Modelled                | Written by    |
+| --------------- | ------ | ----------------------- | ------------- |
+| `namecoin.conf` | INI    | Yes — `FileHelper.ini`  | Actions, init |
+| `store.json`    | JSON   | Yes — `FileHelper.json` | The package   |
 
-There is no monolithic config screen. Settings are edited through grouped **Actions** that write to `namecoin.conf`:
+`namecoin.conf` splits three ways:
 
-| Action           | Group         | Covers                                                           |
-| ---------------- | ------------- | ---------------------------------------------------------------- |
-| RPC Settings     | Configuration | RPC server timeout, threads, work queue                          |
-| Peer Settings    | Configuration | Onlynet, V2 transport, connect/add nodes, max connections        |
-| Mempool Settings | Configuration | Persist mempool, size, expiry, OP_RETURN relay, blocks-only      |
-| Other Settings   | Configuration | Pruning, txindex, dbcache/dbbatch, block filters, wallet, ZeroMQ |
+- **Enforced.** The RPC bind address and allow list, the cookie file name, listening being on, and both peer bind addresses are `z.literal(...).catch(...)` — **repaired on read**, so a hand-edit is reverted. The interfaces are built on exactly those values.
+- **Enforced absent.** Plaintext `rpcuser` and `rpcpassword` are forced to `undefined`: authentication is by cookie, or by hashed `rpcauth` entries the actions generate. A password in the file would be silently stripped rather than honored.
+- **Configurable.** Everything else — mempool policy, peer settings, RPC threading, indexes, pruning, and the advertised addresses.
 
-RPC authentication uses Namecoin Core's auto-generated `.cookie` file, so on-box services can reach the node without a configured password. For remote clients (e.g. a wallet), use the **Generate RPC User Credentials** action to add an `rpcauth` entry.
+The store carries only package state: two "do this on the next start" reindex flags and whether the node has ever finished syncing.
 
-Enforced values (set by StartOS, not user-editable): `rpcbind`/`rpcallowip`, `rpccookiefile`, `listen`/`bind`/`whitebind`. Enabling pruning forces `txindex` off and binds RPC to localhost.
-
----
-
-## Network Access and Interfaces
-
-| Interface | Internal Port | External Port | Type | Purpose                                              |
-| --------- | ------------- | ------------- | ---- | ---------------------------------------------------- |
-| RPC       | 8336          | 8336          | api  | JSON-RPC commands                                    |
-| Peer      | 58334         | 8334          | p2p  | Namecoin P2P network connections                     |
-| ZeroMQ    | 28336         | 28336         | api  | Block/tx notifications (only when ZeroMQ is enabled) |
-
-**Access methods:** LAN IP, `<hostname>.local`, Tor `.onion` address, and custom domains (if configured).
-
----
-
-## Actions (StartOS UI)
-
-| Action                        | Group                  | Notes                                               |
-| ----------------------------- | ---------------------- | --------------------------------------------------- |
-| Runtime Information           | —                      | Connections, block height, sync progress, softforks |
-| Generate RPC User Credentials | RPC Users              | Adds an `rpcauth` entry for remote clients          |
-| Delete RPC Users              | RPC Users              | Removes `rpcauth` entries                           |
-| Reindex Blockchain            | Reindex                | Rebuilds block + chainstate databases from genesis  |
-| Reindex Chainstate            | Reindex                | Rebuilds chainstate only (hidden when pruned)       |
-| Delete Peer List              | Delete Corrupted Files | Removes `peers.dat`                                 |
-| Delete Transaction Index      | Delete Corrupted Files | Removes the txindex                                 |
-| Delete Coinstats Index        | Delete Corrupted Files | Removes the coinstats index                         |
-
-Two further actions — Auto-Configure and Create RPC Credentials — are hidden and exist only for use by dependent services.
-
----
-
-## Backups and Restore
-
-**Included in backup:**
-
-- `main` volume, **excluding** regenerable data: `blocks/`, `chainstate/`, `chainstate.old/`, `indexes/`, `.cookie`, and SQLite journals.
-
-This preserves the wallet, registered names, and `namecoin.conf` while keeping backups small; the blockchain is re-synced on restore. **Restore behavior:** the volume is restored before the service starts.
-
----
-
-## Health Checks
-
-| Check           | Method                               | Meaning                                       |
-| --------------- | ------------------------------------ | --------------------------------------------- |
-| RPC             | Cookie file present + port 8336      | The node's RPC interface is up                |
-| Blockchain Sync | `getblockchaininfo` polling          | Reports IBD progress, then "fully synced"     |
-| Tor             | Tor install/run + onlynet/externalip | Inbound/outbound onion connectivity status    |
-| Clearnet        | onlynet/externalip                   | Inbound/outbound clearnet connectivity status |
-
----
+**`dbcache` and `dbbatchsize` are sized to the machine at install and dropped once sync completes.** A large cache makes the initial sync far faster; keeping it afterwards would hold that memory forever for no benefit, so the first fully-synced start clears both back to upstream's defaults.
 
 ## Dependencies
 
-| Dependency | Required? | Why                                                                                         |
-| ---------- | --------- | ------------------------------------------------------------------------------------------- |
-| Tor        | Optional  | Needed for `.onion` peer connectivity, `onlynet=onion`, or when a Tor address is requested. |
+One, optional, and **declared only while it is in use**.
 
----
+| Dependency | Required               | Kind      | Why                       |
+| ---------- | ---------------------- | --------- | ------------------------- |
+| Tor        | No — only if Tor is on | `running` | Reaching peers over onion |
+
+The dependency appears when an onion address is advertised on the Peer interface or when the network is restricted to onion, and disappears otherwise.
+
+**The Tor SOCKS address is resolved with a fallback**, so it stays constant whether Tor is installed, updated, or removed — installing Tor never restarts the node, and a dead address is simply a refused connection until Tor is up.
+
+**The advertised addresses are maintained for you.** A watcher on the Peer interface writes the node's own onion and public IPv4 addresses into the configuration as they appear, so `externalip` tracks the interface rather than needing to be typed in.
+
+## Network Access and Interfaces
+
+Up to three interfaces.
+
+| Interface | Id     | Type | Port  | Description                          |
+| --------- | ------ | ---- | ----- | ------------------------------------ |
+| RPC       | `rpc`  | api  | 8336  | JSON-RPC, for wallets and dependents |
+| Peer      | `peer` | p2p  | 8334  | The Namecoin peer network            |
+| ZeroMQ    | `zmq`  | api  | 28336 | Block and transaction notifications  |
+
+**The peer binding maps two different ports.** The daemon listens internally on one port and is published externally on the standard one, which is what lets StartOS front the standard port while the node also keeps a separate internal bind for connections arriving over the bridge.
+
+**The ZeroMQ interface is conditional** — exported only while ZMQ is enabled in the configuration, which it is by default on a fresh install.
+
+**RPC has no interface-level gate.** Access is the node's own: the per-run cookie for anything with the volume mounted, or a hashed `rpcauth` credential generated by an action for anything remote.
+
+## Installation and First-Run Flow
+
+Install writes a configuration sized to the machine: ZeroMQ on, block filters on, cache values chosen from available memory, and **pruning enabled automatically when the disk is too small for a full chain**.
+
+**It also pre-seeds a list of bootstrap peers, and that is a workaround.** Upstream's current release ships Bitcoin's DNS seeds for mainnet rather than Namecoin's, so a fresh node asking DNS for peers finds nothing usable. The package therefore installs with a hand-checked `addnode` list so the node can find the network at all.
+
+That workaround has a sharp edge, and it is why an action exists to undo it: **namecoind exempts manually configured peers from misbehavior penalties.** A single broken or hostile peer in that list can saturate the message-handler thread and stall the sync indefinitely, and dropping one peer just lets another rotate into the slot. Once the node has learned real peers by gossip, the list should be removed.
+
+The node then syncs the Namecoin chain. The sync check distinguishes the phases rather than showing a flat percentage, because headers download before any block does — an honest "syncing headers" beats a stuck-looking 0.00%.
+
+## Actions
+
+Seventeen actions, in five groups plus two ungrouped.
+
+### Configuration
+
+#### Peer Settings, RPC Settings, Mempool Settings, Other Settings
+
+Four forms over `namecoin.conf`, split by subject: peer and connection policy, RPC threading and timeouts, mempool size and expiry, and everything else including indexes and pruning.
+
+- **Cost:** the service restarts — namecoind reads its configuration only at start.
+
+#### Graduate From Bootstrap Peers
+
+Removes the install-time bootstrap peer list.
+
+- **Requires the service to be running**, and refuses unless the node has a healthy number of organic outbound peers and has actually verified blocks — the checks exist so graduating cannot orphan the node.
+- **What it changes:** the manual peer list, emptied.
+- **Requires a restart afterwards**, deliberately not done for you: the change is destructive to the peer configuration and worth doing on your own schedule.
+- **This is the intended end state.** The bootstrap list is a crutch for the first sync, not a permanent setting.
+
+#### Configure for ElectrumX
+
+Prepares the node to back a local ElectrumX server: generates an RPC user for it, disables pruning, and enables the transaction index.
+
+- **Shows the generated password once.**
+- **Carries a real warning:** if the node was pruned, turning pruning off means a **full reindex from genesis** on the next start, which takes hours and needs the whole chain on disk plus the index.
+
+#### Name Lookup
+
+Looks up a Namecoin name and shows its current value.
+
+- **Requires the service to be running**; it queries the node over RPC from a temporary container using the cookie.
+- Expired names return an error from the node rather than a value, since resolving them needs an option this package does not enable.
+
+### RPC Users
+
+#### Generate RPC User Credentials
+
+Creates a username and a randomly generated password for remote RPC, storing only the hash in the configuration.
+
+- **The password is shown once.** Only its hash is persisted, so it cannot be recovered afterwards — generate a new one instead.
+
+#### Delete RPC User
+
+Removes a previously generated credential.
+
+### Reindex
+
+#### Reindex Blockchain
+
+Rebuilds everything from the block files on the next start. Hours of work; for a corrupted chainstate or a changed index setting.
+
+#### Reindex Chainstate
+
+Rebuilds only the UTXO set from the existing blocks. Faster than a full reindex, and enough for most chainstate corruption.
+
+Both set a flag that the next start consumes and clears, so the reindex happens exactly once.
+
+### Delete Corrupted Files
+
+#### Delete Transaction Index, Delete Coinstats Index, Delete Peers
+
+Three targeted deletions for a node that will not start.
+
+- **All three require the service to be stopped.**
+- Each removes something the node rebuilds: the transaction index, the coin statistics index, or the peer database.
+
+### Ungrouped
+
+#### Runtime Information
+
+Reports the node's network and chain state — connection counts, chain height, verification progress, size on disk. **Requires the service to be running.**
+
+#### Auto-Configure
+
+Hidden. It lets a dependent service write the node settings it needs, with the fields it supplies locked in the form.
+
+## Tasks
+
+None. This package raises no tasks, so the service is never held on a prompt and its ordinary controls are always available.
+
+## Health Checks
+
+One daemon check and three standalone ones.
+
+| Check           | Displayed as      | Method                                          |
+| --------------- | ----------------- | ----------------------------------------------- |
+| `namecoind`     | "RPC"             | The cookie exists, then the RPC port listens    |
+| `sync-progress` | "Blockchain Sync" | The node's own chain info, over RPC             |
+| `tor`           | "Tor"             | Whether onion is installed, running, in use     |
+| `clearnet`      | "Clearnet"        | Whether clearnet is in use, and inbound-capable |
+
+**The RPC check waits for the cookie before it probes the port**, so it cannot report ready while the credential a client would need has not been written.
+
+**The sync check reports the phase, not just a number.** Connecting, downloading headers, and downloading blocks are three distinct states, and it says which one it is in — a node at 0.00% with headers climbing is working, and one at 0.00% with nothing climbing is not.
+
+The Tor and Clearnet checks are status displays: they report "disabled" when a network is excluded by the configuration, and otherwise say whether the node can accept inbound connections or only make outbound ones.
+
+## Backups and Restore
+
+The `main` volume is copied, with everything rebuildable excluded — `sdk.Backups.ofVolumes('main').setOptions({ exclude })`.
+
+**The chain, the UTXO set, and the indexes are all excluded**, along with the per-run cookie and any database journals. That is by design: the block data re-downloads from the network, and including it would make every backup as large as the chain.
+
+What the backup keeps is what the network cannot give back: **the wallet**, the configuration, the generated RPC credentials, and the package's own state.
+
+**A restored node re-syncs from scratch**, which is the trade. It comes back with the same wallet, the same RPC users, and the same settings.
 
 ## Limitations and Differences
 
-1. **StartOS manages `namecoin.conf`.** Settings are edited via Actions; manual edits are overwritten.
-2. **RPC auth is cookie-first.** There is no fixed RPC username/password; use Generate RPC User Credentials for remote access.
-3. **Fixed ports and binds** are enforced so StartOS networking and dependent services work reliably.
-4. **Built from source**, not from an upstream-published binary — there is no GPG release-signer quorum (Namecoin does not publish one); trust is anchored on the pinned git tag.
-5. **DNS seeds are patched at build time.** Upstream's mainnet chain params ship Bitcoin's DNS seeds and an empty fixed-seed list, so a stock build finds no Namecoin peers and never syncs. The `Dockerfile` rewrites them to the Namecoin community seeder `dnsseed.nmc.testls.space` (a guarded `sed` that fails the build if upstream renames the lines). See [UPDATING.md](./UPDATING.md).
-
----
-
-## What Is Unchanged from Upstream
-
-Namecoin Core's consensus rules, wallet, and RPC surface (including all `name_*` operations) are stock upstream. This package only wraps configuration, networking, health, backup, and lifecycle management around the upstream node — plus the build-time DNS-seed fix noted above (a peer-discovery workaround, not a consensus change).
-
----
-
-## Contributing
-
-Build and development workflow follow the StartOS packaging guide: <https://docs.start9.com/packaging>. Keep `README.md`, `instructions.md`, and `AGENTS.md` in sync with any change to user-visible behavior or package structure.
+1. **No release-signature verification.** The build pins a git tag; upstream publishes no signing quorum to check against.
+2. **The chain is not backed up.** A restore re-syncs from the network.
+3. **Bootstrap peers are seeded at install as an upstream workaround**, and should be removed with the graduate action once the node has organic peers.
+4. **Plaintext RPC credentials cannot be set** in the configuration; they are stripped on read in favor of the cookie or a hashed entry.
+5. **A generated RPC password is shown once** and only its hash is kept.
+6. **Turning pruning off requires a full reindex** if the node was ever pruned.
+7. **Pruning may be enabled automatically at install** on a machine without room for the full chain.
+8. **Mainnet only.**
+9. **Expired name lookups fail**, since historic name resolution is not enabled.
 
 ---
 
 ## Quick Reference for AI Consumers
 
 ```yaml
-package_id: namecoind
-image: built-from-source (github.com/namecoin/namecoin-core, CMake)
-architectures: [x86_64, aarch64]
+package_id: namecoind # note: the repo is namecoin-core-startos
+image: built from ./Dockerfile # compiled from a pinned upstream git tag
+architectures:
+  - x86_64
+  - aarch64
+subcontainers:
+  - namecoind-sub
 volumes:
   main: /root/.namecoin
-interfaces:
-  rpc: { port: 8336, type: api, auth: cookie + optional rpcauth }
-  peer: { external_port: 8334, internal_port: 58334, type: p2p }
-  zmq: { port: 28336, type: api, conditional: zmqEnabled }
-config: via actions (RPC / Peer / Mempool / Other Settings, group "Configuration")
+file_models:
+  - namecoin.conf # ini; enforced literals, and rpcuser/rpcpassword forced undefined
+  - store.json # reindex flags, fullySynced, snapshotInUse
+startos_managed_env_vars: [] # configuration is namecoin.conf plus computed CLI args
 dependencies:
-  tor: optional
+  - tor # optional, kind: running, declared only when onion is advertised or forced
+interfaces:
+  rpc: { type: api, port: 8336 } # cookie auth, or a hashed rpcauth entry
+  peer: { type: p2p, port: 8334 } # internal bind is a different port
+  zmq: { type: api, port: 28336 } # only while ZMQ is enabled
 actions:
-  - runtime-info
+  - peers-config
+  - rpc-config
+  - mempool-config
+  - other-config
+  - graduate-from-bootstrap # only-running; guards on organic peer count
+  - configure-for-electrumx
+  - name-lookup # only-running
   - generate-rpcuser
+  - generate-rpc-dependent
   - delete-rpcauth
   - reindex-blockchain
   - reindex-chainstate
-  - delete-peers
-  - delete-txindex
-  - delete-coinstatsindex
+  - delete-txindex # only-stopped
+  - delete-coinstats-index # only-stopped
+  - delete-peers # only-stopped
+  - runtime-info # only-running
+  - autoconfig # hidden; for dependent services
+tasks: []
+health_checks:
+  - namecoind # displayed "RPC"; waits for the cookie before probing the port
+  - sync-progress # reports connecting / headers / blocks as distinct phases
+  - tor # status display
+  - clearnet # status display
 ```

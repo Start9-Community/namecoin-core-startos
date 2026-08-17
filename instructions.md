@@ -85,13 +85,13 @@ Backups include your wallet and registered names but exclude the blockchain (whi
 
 ## Using your node from Amethyst (Nostr client)
 
-[Amethyst](https://github.com/vitorpamplona/amethyst) is a Nostr client for Android that can resolve `.bit` / `d/` / `id/` Namecoin names to Nostr identities (for NIP-05 verification, follow-import, and search). From the *Namecoin* settings screen you can point Amethyst directly at *this* Namecoin Core node via JSON-RPC instead of using third-party ElectrumX servers — the most sovereign option, no public operator sees your lookups.
+[Amethyst](https://github.com/vitorpamplona/amethyst) is a Nostr client for Android that can resolve `.bit` / `d/` / `id/` Namecoin names to Nostr identities (for NIP-05 verification, follow-import, and search). From the _Namecoin_ settings screen you can point Amethyst directly at _this_ Namecoin Core node via JSON-RPC instead of using third-party ElectrumX servers — the most sovereign option, no public operator sees your lookups.
 
 What you need:
 
 1. **An RPC user** for the remote client. Run **Actions → Generate RPC User Credentials**, pick a username, and copy the generated password (only a hash is stored, so you can't recover it later).
-2. **The RPC interface URL** for the *RPC* service interface (port 8336). Open **Service Interfaces → RPC** and copy one of the addresses:
-   - **Tor onion** (recommended for phones over the public internet) — the `http://<onion>.onion:8336/` URL listed under the *Tor* address.
+2. **The RPC interface URL** for the _RPC_ service interface (port 8336). Open **Service Interfaces → RPC** and copy one of the addresses:
+   - **Tor onion** (recommended for phones over the public internet) — the `http://<onion>.onion:8336/` URL listed under the _Tor_ address.
    - **LAN HTTPS** — if Amethyst is on the same network and you've installed the StartOS root CA on the device.
    - **LAN HTTP / IP** — only on a trusted LAN.
 
@@ -103,7 +103,7 @@ Then in Amethyst:
 4. Tap **Test RPC**. A green card showing `chain=main height=… sync=…%` confirms the connection.
 5. (Optional) Under **Fallback policy**, decide whether Amethyst is allowed to fall back to ElectrumX if your node is unreachable. Both toggles default **off** — enabling them widens who sees the lookup, so opt in deliberately.
 
-From that point on every `.bit` / `d/` / `id/` lookup in Amethyst (search bar, NIP-05 verification, follow-import) runs `name_show` against *this* node.
+From that point on every `.bit` / `d/` / `id/` lookup in Amethyst (search bar, NIP-05 verification, follow-import) runs `name_show` against _this_ node.
 
 Under the hood Amethyst issues a plain JSON-RPC `name_show` POST, identical to:
 
