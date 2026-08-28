@@ -9,7 +9,7 @@
 > upstream documentation is accurate and fully applicable — see the
 > Documentation section of `instructions.md` for links.
 
-[Namecoin Core](https://github.com/namecoin/namecoin-core) is the reference full node for Namecoin, a merge-mined blockchain that stores names as well as coins. This package builds it from source, manages its configuration file, and works around an upstream bug that would otherwise leave a fresh node unable to find any peers.
+[Namecoin Core](https://github.com/namecoin/namecoin-core) is the reference full node for Namecoin, a merge-mined blockchain that stores names as well as coins. This package builds it from source and manages its configuration file.
 
 - **Upstream repo:** <https://github.com/namecoin/namecoin-core>
 - **Wrapper repo:** <https://github.com/Start9-Community/namecoin-core-startos>
@@ -94,7 +94,7 @@ Two models.
 
 The store carries only package state: two "do this on the next start" reindex flags and whether the node has ever finished syncing.
 
-**`dbcache` and `dbbatchsize` are sized to the machine at install and dropped once sync completes.** A large cache makes the initial sync far faster; keeping it afterwards would hold that memory forever for no benefit, so the first fully-synced start clears both back to upstream's defaults.
+**`dbcache` and `dbbatchsize` are sized to the machine at install and reduced once sync completes.** A large cache makes the initial sync far faster; keeping it afterwards would hold that memory forever for no benefit. The first fully-synced start clears `dbbatchsize` and pins `dbcache` to 450 MiB — namecoind's own default is 1024 MiB on a host reporting 4 GiB or more, so clearing it would raise the post-sync footprint rather than lower it.
 
 ## Dependencies
 
@@ -130,9 +130,9 @@ Up to three interfaces.
 
 Install writes a configuration sized to the machine: ZeroMQ on, block filters on, cache values chosen from available memory, and **pruning enabled automatically when the disk is too small for a full chain**.
 
-**It also pre-seeds a list of bootstrap peers, and that is a workaround.** Upstream's current release ships Bitcoin's DNS seeds for mainnet rather than Namecoin's, so a fresh node asking DNS for peers finds nothing usable. The package therefore installs with a hand-checked `addnode` list so the node can find the network at all.
+**Peer discovery is namecoind's own** — the mainnet DNS seeders compiled into the release, with its built-in fixed seed list as the fallback. The package configures no peers of its own.
 
-That workaround has a sharp edge, and it is why an action exists to undo it: **namecoind exempts manually configured peers from misbehavior penalties.** A single broken or hostile peer in that list can saturate the message-handler thread and stall the sync indefinitely, and dropping one peer just lets another rotate into the slot. Once the node has learned real peers by gossip, the list should be removed.
+**Manually configured peers are a sharp edge, and that is why an action exists to clear them.** namecoind exempts every `addnode` and `connect` peer from misbehavior penalties. A single broken or hostile peer in that list can saturate the message-handler thread and stall the sync indefinitely, and dropping one peer just lets another rotate into the slot. A node carrying a manual list from an earlier release of this package should have it cleared once the node has learned real peers by gossip.
 
 The node then syncs the Namecoin chain. The sync check distinguishes the phases rather than showing a flat percentage, because headers download before any block does — an honest "syncing headers" beats a stuck-looking 0.00%.
 
@@ -150,12 +150,12 @@ Four forms over `namecoin.conf`, split by subject: peer and connection policy, R
 
 #### Graduate From Bootstrap Peers
 
-Removes the install-time bootstrap peer list.
+Empties the manually configured peer list in `namecoin.conf`.
 
-- **Requires the service to be running**, and refuses unless the node has a healthy number of organic outbound peers and has actually verified blocks — the checks exist so graduating cannot orphan the node.
+- **Requires the service to be running**, and refuses unless the node has a healthy number of organic outbound peers and has actually verified blocks — the checks exist so clearing the list cannot orphan the node.
 - **What it changes:** the manual peer list, emptied.
 - **Requires a restart afterwards**, deliberately not done for you: the change is destructive to the peer configuration and worth doing on your own schedule.
-- **This is the intended end state.** The bootstrap list is a crutch for the first sync, not a permanent setting.
+- **Reports that there is nothing to do** when no manual peers are set, which is the state a fresh install starts in.
 
 #### Configure for ElectrumX
 
@@ -249,13 +249,12 @@ What the backup keeps is what the network cannot give back: **the wallet**, the 
 
 1. **No release-signature verification.** The build pins a git tag; upstream publishes no signing quorum to check against.
 2. **The chain is not backed up.** A restore re-syncs from the network.
-3. **Bootstrap peers are seeded at install as an upstream workaround**, and should be removed with the graduate action once the node has organic peers.
-4. **Plaintext RPC credentials cannot be set** in the configuration; they are stripped on read in favor of the cookie or a hashed entry.
-5. **A generated RPC password is shown once** and only its hash is kept.
-6. **Turning pruning off requires a full reindex** if the node was ever pruned.
-7. **Pruning may be enabled automatically at install** on a machine without room for the full chain.
-8. **Mainnet only.**
-9. **Expired name lookups fail**, since historic name resolution is not enabled.
+3. **Plaintext RPC credentials cannot be set** in the configuration; they are stripped on read in favor of the cookie or a hashed entry.
+4. **A generated RPC password is shown once** and only its hash is kept.
+5. **Turning pruning off requires a full reindex** if the node was ever pruned.
+6. **Pruning may be enabled automatically at install** on a machine without room for the full chain.
+7. **Mainnet only.**
+8. **Expired name lookups fail**, since historic name resolution is not enabled.
 
 ---
 

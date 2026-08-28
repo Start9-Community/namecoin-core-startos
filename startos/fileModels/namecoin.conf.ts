@@ -316,7 +316,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
     min: 0,
     integer: true,
     units: 'MiB',
-    footnote: `${i18n('Default')}: 450 MiB`,
+    footnote: `${i18n('Default')}: 1024 MiB`,
   }),
   dbbatchsize: Value.number({
     name: i18n('Database Batch'),

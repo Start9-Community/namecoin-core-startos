@@ -278,7 +278,7 @@ const dict = {
 
   // actions/graduateFromBootstrap.ts
   'Graduate From Bootstrap Peers': 1970,
-  'Remove the install-time addnode list once the node has learned enough organic peers. Manual peers are exempt from misbehavior penalties; keeping them long-term lets a single bad peer stall sync. Restart the package after running this action.': 1971,
+  'Remove any manually configured peers once the node has learned enough peers on its own. Manual peers are exempt from misbehavior penalties; keeping them long-term lets a single bad peer stall sync. Restart the package after running this action.': 1971,
   'You must restart Namecoin after running this action for the new peer config to take effect.': 1972,
   'Already Graduated': 1973,
   'The manual peer list is already empty.': 1974,

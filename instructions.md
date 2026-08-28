@@ -46,34 +46,15 @@ Settings are edited through **Actions** (grouped under **Configuration**), not a
 
 By default the node runs as a full archival node. On a small disk, enable **Pruning** under Other Settings to cap blockchain storage — note that pruning is incompatible with the transaction index, which will be turned off automatically. If you intend to run ElectrumX or any wallet that needs historical transactions, **leave pruning off and turn `txindex` on**.
 
-## Bootstrap peers and the "Graduate" workflow ⚠️
+## Peers
 
-This is the most important quirk in the current package — read it before you assume sync is broken.
+Namecoin Core finds peers on its own; there is nothing to configure before it can sync.
 
-### Why there's a default peer list
+### Manually added peers ⚠️
 
-Upstream Namecoin Core (nc30.x) inherited Bitcoin's `vSeeds` instead of Namecoin's during the bitcoin-30.x merge (tracked as [namecoin/namecoin-core#593](https://github.com/namecoin/namecoin-core/pull/593)). The DNS-seed thread queries Bitcoin's seeds, never finds a Namecoin peer, and a fresh node sits at 0 connections forever.
+Namecoin Core never disconnects or bans a peer you added by hand, even one flooding it with junk. A single bad entry can stall syncing entirely, looking like "stuck at X%" with no obvious error, so add peers under **Peer Settings** only when you have a reason to. Choosing **Connect** rather than **Add Node** does not avoid this — both count as manual.
 
-Of the six Namecoin mainnet DNS seeds, only **two** currently resolve at all (`dnsseed.nmc.testls.space`, `namecoin.seed.cypherstack.com`). To work around this, the package seeds a curated list of known-good Namecoin nodes as `addnode=` entries in `namecoin.conf` on install. A fresh sideload now connects to ~8 peers within ~9 seconds and starts syncing immediately.
-
-### Why you should "graduate" once sync is moving
-
-`addnode=` peers are exempt from misbehavior disconnect/ban — namecoind logs "not punishing manually connected peer" and keeps them connected even when they spam junk. A single broken or malicious peer in the list can saturate the message-handler thread and **stall the entire sync** with the appearance of "stuck at X%" but no obvious error.
-
-Observed during testing: sync stalled at ~55% with one peer spamming ~20 misbehavior warnings/sec. Removing manual peers individually was whack-a-mole — a different bad peer rotated into the slot. The clean fix is to drop the whole manual peer list once the address manager is warm with peers learned via gossip.
-
-Switching `addnode=` → `connect=` does **not** help — both land in the "manual" bucket.
-
-### When and how to graduate
-
-Run **Actions → Graduate From Bootstrap Peers** once the node has:
-
-- ≥ 5 organic outbound connections, and
-- some blocks verified (i.e. address manager is warm).
-
-The action refuses to run otherwise so you can't orphan a node that's still in earliest bootstrap. It edits `namecoin.conf` only; you must **restart the package** afterwards because namecoind reads `addnode=` entries only at startup.
-
-After graduating, the node finds its own peers via the standard gossip path. The Runtime Information action will show 10 outbound on its own.
+If **Peer Settings** already lists peers you never added, they came from an earlier version of this package. Run **Actions → Graduate From Bootstrap Peers** once the node has at least 5 outbound connections and some blocks verified, then **restart the package** — Namecoin Core reads the peer list only at startup. The action refuses to run before then, so it cannot leave your node without connections.
 
 ### Inbound connections
 
