@@ -1,23 +1,43 @@
 import { VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '30.2.0.4:4',
+  version: '31.1:0',
   releaseNotes: {
-    en_US: `Resolves the addresses of connected services more reliably.
+    en_US: `Updated Namecoin Core to 31.1.
 
-Namecoin Core looked up where to reach its dependencies through a field that only applies to one of the two ways a service can publish a port. It now reads the address itself, so a dependency changing how it serves TLS can no longer leave Namecoin Core unable to find it. Nothing changes in normal operation.`,
-    es_ES: `Resuelve de forma más fiable las direcciones de los servicios conectados.
+- Redesigned mempool for better block templates and more predictable transaction replacement
+- Transactions can optionally be broadcast only over Tor or I2P
+- Fresh installs no longer come with a preset peer list; the node finds Namecoin peers on its own
 
-Namecoin Core localizaba sus dependencias mediante un campo que solo se aplica a una de las dos formas en que un servicio puede publicar un puerto. Ahora lee la dirección en sí, de modo que si una dependencia cambia su forma de servir TLS, Namecoin Core seguirá encontrándola. En funcionamiento normal no cambia nada.`,
-    de_DE: `Ermittelt die Adressen verbundener Dienste zuverlässiger.
+[Full release notes](https://github.com/namecoin/namecoin-core/releases/tag/nc31.1)`,
+    es_ES: `Namecoin Core actualizado a la versión 31.1.
 
-Namecoin Core suchte seine Abhängigkeiten über ein Feld, das nur für eine der beiden Arten gilt, auf die ein Dienst einen Port veröffentlichen kann. Jetzt wird die Adresse selbst gelesen, sodass eine Abhängigkeit, die ihre TLS-Bereitstellung ändert, für Namecoin Core auffindbar bleibt. Im normalen Betrieb ändert sich nichts.`,
-    pl_PL: `Pewniej ustala adresy połączonych usług.
+- Mempool rediseñada, con mejores plantillas de bloque y un reemplazo de transacciones más predecible
+- Las transacciones pueden difundirse opcionalmente solo a través de Tor o I2P
+- Las instalaciones nuevas ya no incluyen una lista de pares predefinida; el nodo encuentra pares de Namecoin por sí mismo
 
-Namecoin Core wyszukiwał swoje zależności przez pole, które dotyczy tylko jednego z dwóch sposobów publikowania portu przez usługę. Teraz odczytuje sam adres, więc zależność zmieniająca sposób udostępniania TLS nadal pozostanie odnajdywalna dla Namecoin Core. W normalnej pracy nic się nie zmienia.`,
-    fr_FR: `Détermine plus fiablement les adresses des services connectés.
+[Notas de la versión completas](https://github.com/namecoin/namecoin-core/releases/tag/nc31.1)`,
+    de_DE: `Namecoin Core auf 31.1 aktualisiert.
 
-Namecoin Core localisait ses dépendances via un champ qui ne s'applique qu'à l'un des deux modes de publication d'un port par un service. Il lit désormais l'adresse elle-même : une dépendance qui change sa façon de servir TLS reste donc trouvable par Namecoin Core. Rien ne change en fonctionnement normal.`,
+- Neu gestalteter Mempool für bessere Blockvorlagen und berechenbareren Transaktionsersatz
+- Transaktionen können wahlweise ausschließlich über Tor oder I2P verbreitet werden
+- Neuinstallationen enthalten keine voreingestellte Peer-Liste mehr; der Knoten findet Namecoin-Peers selbst
+
+[Vollständige Versionshinweise](https://github.com/namecoin/namecoin-core/releases/tag/nc31.1)`,
+    pl_PL: `Zaktualizowano Namecoin Core do wersji 31.1.
+
+- Przeprojektowany mempool zapewnia lepsze szablony bloków i bardziej przewidywalne zastępowanie transakcji
+- Transakcje można opcjonalnie rozgłaszać wyłącznie przez Tor lub I2P
+- Nowe instalacje nie zawierają już wstępnie ustawionej listy węzłów; węzeł sam znajduje węzły Namecoin
+
+[Pełne informacje o wydaniu](https://github.com/namecoin/namecoin-core/releases/tag/nc31.1)`,
+    fr_FR: `Namecoin Core mis à jour vers la version 31.1.
+
+- Mempool repensée, avec de meilleurs modèles de blocs et un remplacement de transactions plus prévisible
+- Les transactions peuvent être diffusées uniquement via Tor ou I2P, au choix
+- Les nouvelles installations ne contiennent plus de liste de pairs prédéfinie ; le nœud trouve seul des pairs Namecoin
+
+[Notes de version complètes](https://github.com/namecoin/namecoin-core/releases/tag/nc31.1)`,
   },
   migrations: {
     up: async ({ effects }) => {},

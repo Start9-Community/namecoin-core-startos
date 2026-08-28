@@ -229,7 +229,7 @@ export const main = sdk.setupMain(async ({ effects }) => {
             })
             // Reduce dbcache and dbbatchsize after initial sync to free RAM
             await namecoinConfFile.merge(effects, {
-              dbcache: undefined,
+              dbcache: 450,
               dbbatchsize: undefined,
             })
           }
