@@ -26,6 +26,7 @@ verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
+- **`0 addresses found from DNS seeds` in the log is normal.** The Namecoin seeders don't serve the `x9.` service-bit prefix namecoind queries, so that lookup always returns nothing; namecoind then reaches the same seeders as addr-fetch peers and bootstraps fine. Don't read it as broken seeds and don't answer it by re-adding a bootstrap `addnode` list.
 - **`addnode=` is a footgun, and `connect=` is not a fix.** namecoind exempts every manually configured peer from misbehavior disconnect/ban ("not punishing manually connected peer"), so one junk peer can saturate the message-handler thread and stall sync — observed stalling at ~55% until _all_ manual peers were removed. That is what `graduate-from-bootstrap` is for; keep its guards (organic outbound count, blocks > 0).
 - **The `.cookie` is removed before every start** and the daemon's `ready` waits for the new one before probing the port — a stale cookie from an unclean shutdown authenticates nothing.
 - **`sigtermTimeout: 300_000` is deliberate.** A chainstate flush can take minutes; cutting it short corrupts the database.

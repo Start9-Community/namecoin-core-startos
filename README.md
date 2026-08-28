@@ -130,7 +130,7 @@ Up to three interfaces.
 
 Install writes a configuration sized to the machine: ZeroMQ on, block filters on, cache values chosen from available memory, and **pruning enabled automatically when the disk is too small for a full chain**.
 
-**Peer discovery is namecoind's own** — the mainnet DNS seeders compiled into the release, with its built-in fixed seed list as the fallback. The package configures no peers of its own.
+**Peer discovery is namecoind's own, and the log line it produces looks like a failure.** namecoind asks each mainnet seeder for a service-bit-prefixed name (`x9.<seed>`), which none of the six Namecoin seeders implement, so that lookup returns nothing and the log reads `0 addresses found from DNS seeds`. **That is expected, not a fault.** It then connects to each seeder directly as an addr-fetch peer, which is the path that actually works: on a fresh install this fills the address manager within seconds and the node reaches its full outbound peer count in a couple of minutes. The compiled-in fixed seed list sits behind that as a further fallback. The package configures no peers of its own.
 
 **Manually configured peers are a sharp edge, and that is why an action exists to clear them.** namecoind exempts every `addnode` and `connect` peer from misbehavior penalties. A single broken or hostile peer in that list can saturate the message-handler thread and stall the sync indefinitely, and dropping one peer just lets another rotate into the slot. A node carrying a manual list from an earlier release of this package should have it cleared once the node has learned real peers by gossip.
 
