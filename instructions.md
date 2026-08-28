@@ -1,12 +1,9 @@
 # Namecoin Core
 
-You've installed Namecoin Core — a full Namecoin node and wallet. Namecoin is the first fork of Bitcoin and provides a decentralized DNS and identity system: censorship-resistant `.bit` domains, identity records, and NMC transactions, with no trusted third party.
-
 ## Documentation
 
-- [Namecoin website](https://www.namecoin.org/) — what Namecoin is and what you can do with it.
+- [Namecoin project documentation](https://www.namecoin.org/) — what Namecoin is, how names work, and how to use them.
 - [Namecoin Core upstream](https://github.com/namecoin/namecoin-core) — the node software this package runs.
-- [Name operations](https://www.namecoin.org/dot-bit/) — registering and managing `.bit` names.
 
 ## Initial Sync
 
@@ -28,7 +25,7 @@ To check live status — connections, block height, sync progress — run the **
 
 ### Name operations
 
-Namecoin's defining feature is its name database. Common RPC calls:
+Namecoin's defining feature is its name database — see [registering and managing `.bit` names](https://www.namecoin.org/dot-bit/) for what names are and how to use them. Common RPC calls:
 
 - `name_new` / `name_firstupdate` — register a name (two-step)
 - `name_update` — change a name's value
