@@ -74,10 +74,14 @@ export const configureForElectrumx = sdk.Action.withInput(
       return {
         version: '1',
         title: i18n('Failed to create RPC user'),
-        message: i18n('rpcauth.py failed with error: ${error}', {
-          error: res.stderr as string,
-        }),
-        result: null,
+        message: i18n('rpcauth.py failed. Its error output is below.'),
+        result: {
+          type: 'multiline',
+          value: String(res.stderr),
+          copyable: true,
+          masked: false,
+          qr: false,
+        },
       }
     }
 

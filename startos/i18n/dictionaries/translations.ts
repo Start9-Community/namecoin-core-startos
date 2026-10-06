@@ -38,7 +38,7 @@ export default {
 
     // actions/generateRpcUser.ts
     200: 'Nombre de usuario',
-    201: 'Nombre de usuario de autenticación RPC',
+    201: 'El nombre con el que el cliente iniciará sesión en la interfaz RPC. Debe ser distinto de todos los usuarios RPC existentes.',
     202: 'Debe ser alfanumérico (puede contener guion bajo).',
     203: 'Generar credenciales de usuario RPC',
     204: 'Generar credenciales de usuario RPC para conexiones remotas, por ejemplo, Sparrow. rpcauth.py generará aleatoriamente una contraseña segura. El nombre de usuario y la contraseña cifrada se guardarán en Namecoin.conf',
@@ -48,7 +48,7 @@ export default {
     208: 'Usuario RPC creado exitosamente',
     209: 'Contraseña RPC creada para ${username}. Guarde esta contraseña en un lugar seguro. Si la pierde, será necesario crear un nuevo usuario RPC ya que Namecoin.conf solo almacena un hash de la contraseña',
     212: 'Error al crear usuario RPC',
-    213: 'rpcauth.py falló con error: ${error}',
+    213: 'rpcauth.py falló. Su salida de error se muestra a continuación.',
 
     // actions/generateRpcUserDependent.ts
     300: 'Contraseña',
@@ -166,10 +166,10 @@ export default {
 
     // actions/config/peers.ts - Peer settings
     1236: 'Onlynet',
-    1237: 'Realizar conexiones salientes automáticas solo a las redes seleccionadas. Las conexiones entrantes y manuales no se ven afectadas por esta opción.',
+    1237: 'Establece conexiones salientes automáticas solo con las redes seleccionadas; si no se selecciona ninguna, Namecoin las usa todas. Las conexiones entrantes y manuales no se ven afectadas.\n- ipv4, ipv6: pares de clearnet\n- onion (Tor): requiere el servicio Tor',
 
     1243: 'Usar protocolo de transporte P2P V2',
-    1244: 'Habilitar o deshabilitar el uso del protocolo de transporte P2P BIP324 V2.',
+    1244: 'Cifra las conexiones con los pares que lo admiten (BIP324), lo que dificulta observar su tráfico. Los pares que no lo admiten siguen conectándose sin cifrar.',
     1245: 'Conectar par',
     1246: 'Conectar',
     1247: 'Conectar nodos',
@@ -190,9 +190,9 @@ export default {
     1500: 'Persistir Mempool',
     1501: 'Guardar el mempool al apagar y cargar al reiniciar.',
     1502: 'Tamaño máximo de Mempool',
-    1503: 'Mantener el mempool de transacciones por debajo de <n> megabytes.',
+    1503: 'Mantener el mempool de transacciones por debajo de este tamaño.',
     1504: 'Expiración de Mempool',
-    1505: 'No mantener transacciones en el mempool más de <n> horas.',
+    1505: 'No mantener transacciones en el mempool más de este número de horas.',
     1506: 'Hr',
     1507: 'Permitir Bare Multisig',
     1508: 'Retransmitir transacciones multisig que no sean P2SH',
@@ -220,10 +220,10 @@ export default {
     1700: 'ZeroMQ habilitado',
     1701: 'La interfaz ZeroMQ es útil para algunas aplicaciones que pueden requerir datos relacionados con eventos de bloques y transacciones de Namecoin Core. Por ejemplo, LND requiere que ZeroMQ esté habilitado para que LND obtenga los datos de bloque más recientes',
     1702: 'Índice de transacciones',
-    1703: 'Al habilitar el índice de transacciones (txindex), Namecoin Core construirá un índice de transacciones completo. Esto permite que Namecoin Core acceda a cualquier transacción con comandos como `getrawtransaction`.',
+    1703: 'Al habilitar el índice de transacciones (txindex), Namecoin Core construirá un índice de transacciones completo. Esto permite que Namecoin Core acceda a cualquier transacción con comandos como getrawtransaction.',
     1704: 'No hay suficiente espacio en disco',
     1705: 'Notificación de bloque',
-    1706: 'Ejecutar un comando arbitrario cuando cambie el mejor bloque',
+    1706: 'Un comando de shell que Namecoin ejecuta dentro de su contenedor cada vez que cambia el mejor bloque. %s en el comando se sustituye por el hash del bloque.',
     1707: 'Índice Coinstats',
     1708: 'Habilitar el índice Coinstats reduce el tiempo para que se complete el RPC gettxoutsetinfo a costa de usar espacio adicional en disco',
     1709: 'Billetera',
@@ -293,13 +293,11 @@ export default {
     2101: 'Nombre a buscar',
     2102: 'Un nombre de Namecoin en forma espacio/nombre. Ejemplos: d/wikileaks (dominio), id/alice (identidad), dd/testls (subespacio DNS).',
     2103: 'Debe ser espacio/nombre (espacio en minúsculas, alfanuméricos/punto/guion bajo/guion en el nombre).',
-    2104: 'Resuelve un nombre de Namecoin en el nodo en ejecución y muestra el resultado JSON. Equivalente a `namecoin-cli name_show <name>`.',
+    2104: 'Resuelve un nombre de Namecoin en el nodo en ejecución y muestra el resultado JSON, como hace namecoin-cli name_show.',
     2105: 'Resultado de la búsqueda de nombres',
     2106: 'Encontrado: ${name}',
-    2107: 'Resultado JSON',
     2108: 'Búsqueda de nombres fallida',
     2109: 'La búsqueda de ${name} falló.',
-    2110: 'Error',
     2400: 'Configurar para ElectrumX',
     2401: 'Prepara Namecoin Core para respaldar un servidor ElectrumX local: genera un usuario RPC para ElectrumX, desactiva la poda (prune=0) y activa el índice de transacciones (txindex=true). La contraseña generada se muestra una sola vez: cópiela en ElectrumX de inmediato. Si la poda estaba activada, se programará una reindexación completa de la blockchain en el próximo inicio.',
     2402: 'Desactivar la poda requiere una cadena completa (sin podar). Si la poda estaba activada, Namecoin Core reindexará desde el bloque génesis en el próximo inicio: esto puede tardar horas y necesita mucho más espacio en disco (~10–15 GB de cadena + ~5 GB de índice de ElectrumX).',
@@ -308,6 +306,8 @@ export default {
     2405: 'Usuario RPC "${username}" creado, poda desactivada, índice de transacciones activado. Copie la contraseña de abajo en la acción "Namecoin Core Connection" de ElectrumX. La contraseña se muestra UNA SOLA VEZ: si la pierde, deberá crear un nuevo usuario RPC. ${reindexNote}',
     2406: 'La poda estaba activada anteriormente; Namecoin Core realizará una reindexación completa de la blockchain en el próximo inicio.',
     2407: 'No se requiere reindexación.',
+    2408: '- Agregar nodo: conecta con estos nodos además de con los pares que Namecoin encuentra por sí mismo.\n- Conectar: conecta solo con estos nodos. Namecoin no establece ninguna otra conexión saliente.',
+    2409: 'Namecoin olvida los pares que ha conocido y busca otros nuevos al iniciarse de nuevo, por lo que la conexión puede tardar más.',
   } satisfies LangDict,
   de_DE: {
     // main.ts
@@ -346,7 +346,7 @@ export default {
 
     // actions/generateRpcUser.ts
     200: 'Benutzername',
-    201: 'RPC-Authentifizierungsbenutzername',
+    201: 'Der Name, mit dem sich der Client an der RPC-Schnittstelle anmeldet. Er muss sich von allen vorhandenen RPC-Benutzern unterscheiden.',
     202: 'Muss alphanumerisch sein (kann Unterstrich enthalten).',
     203: 'RPC-Benutzeranmeldeinformationen generieren',
     204: 'RPC-Benutzeranmeldeinformationen für Remote-Verbindungen generieren, z.B. Sparrow. rpcauth.py generiert zufällig ein sicheres Passwort. Der Benutzername und das gehashte Passwort werden in Namecoin.conf gespeichert',
@@ -356,7 +356,7 @@ export default {
     208: 'RPC-Benutzer erfolgreich erstellt',
     209: 'RPC-Passwort für ${username} erstellt. Bewahren Sie dieses Passwort an einem sicheren Ort auf. Wenn es verloren geht, muss ein neuer RPC-Benutzer erstellt werden, da Namecoin.conf nur einen Hash des Passworts speichert',
     212: 'Fehler beim Erstellen des RPC-Benutzers',
-    213: 'rpcauth.py ist mit Fehler fehlgeschlagen: ${error}',
+    213: 'rpcauth.py ist fehlgeschlagen. Die Fehlerausgabe steht unten.',
 
     // actions/generateRpcUserDependent.ts
     300: 'Passwort',
@@ -474,10 +474,10 @@ export default {
 
     // actions/config/peers.ts - Peer settings
     1236: 'Onlynet',
-    1237: 'Automatische ausgehende Verbindungen nur zu den ausgewählten Netzwerken herstellen. Eingehende und manuelle Verbindungen sind von dieser Option nicht betroffen.',
+    1237: 'Baut automatische ausgehende Verbindungen nur zu den ausgewählten Netzwerken auf; ist keines ausgewählt, nutzt Namecoin alle. Eingehende und manuelle Verbindungen sind nicht betroffen.\n- ipv4, ipv6: Clearnet-Peers\n- onion (Tor): erfordert den Tor-Dienst',
 
     1243: 'V2 P2P-Transportprotokoll verwenden',
-    1244: 'Aktivieren oder deaktivieren Sie die Verwendung des BIP324 V2 P2P-Transportprotokolls.',
+    1244: 'Verschlüsselt Verbindungen mit Peers, die es unterstützen (BIP324), sodass Ihr Datenverkehr schwerer zu beobachten ist. Peers ohne Unterstützung verbinden sich weiterhin unverschlüsselt.',
     1245: 'Peer verbinden',
     1246: 'Verbinden',
     1247: 'Knoten verbinden',
@@ -498,9 +498,9 @@ export default {
     1500: 'Mempool behalten',
     1501: 'Speichern Sie den Mempool beim Herunterfahren und laden Sie ihn beim Neustart.',
     1502: 'Maximale Mempool-Größe',
-    1503: 'Halten Sie den Transaktionsspeicherpool unter <n> Megabyte.',
+    1503: 'Halten Sie den Transaktionsspeicherpool unter dieser Größe.',
     1504: 'Mempool-Ablauf',
-    1505: 'Transaktionen nicht länger als <n> Stunden im Mempool behalten.',
+    1505: 'Transaktionen nicht länger als diese Anzahl Stunden im Mempool behalten.',
     1506: 'Std',
     1507: 'Bare Multisig zulassen',
     1508: 'Nicht-P2SH-Multisig-Transaktionen weiterleiten',
@@ -528,10 +528,10 @@ export default {
     1700: 'ZeroMQ aktiviert',
     1701: 'Die ZeroMQ-Schnittstelle ist nützlich für einige Anwendungen, die Daten zu Block- und Transaktionsereignissen von Namecoin Core benötigen könnten. Beispielsweise muss LND ZeroMQ aktiviert haben, damit LND die neuesten Blockdaten erhält',
     1702: 'Transaktionsindex',
-    1703: 'Durch Aktivieren des Transaktionsindex (txindex) erstellt Namecoin Core einen vollständigen Transaktionsindex. Dadurch kann Namecoin Core mit Befehlen wie `getrawtransaction` auf jede Transaktion zugreifen.',
+    1703: 'Durch Aktivieren des Transaktionsindex (txindex) erstellt Namecoin Core einen vollständigen Transaktionsindex. Dadurch kann Namecoin Core mit Befehlen wie getrawtransaction auf jede Transaktion zugreifen.',
     1704: 'Nicht genügend Speicherplatz',
     1705: 'Blockbenachrichtigung',
-    1706: 'Führen Sie einen beliebigen Befehl aus, wenn sich der beste Block ändert',
+    1706: 'Ein Shell-Befehl, den Namecoin in seinem Container ausführt, sobald sich der beste Block ändert. %s im Befehl wird durch den Block-Hash ersetzt.',
     1707: 'Coinstats-Index',
     1708: 'Das Aktivieren des Coinstats-Index verkürzt die Zeit für die Ausführung des gettxoutsetinfo-RPC auf Kosten zusätzlichen Speicherplatzes',
     1709: 'Wallet',
@@ -601,13 +601,11 @@ export default {
     2101: 'Zu suchender Name',
     2102: 'Ein Namecoin-Name in der Form namespace/name. Beispiele: d/wikileaks (Domain), id/alice (Identität), dd/testls (DNS-Unternamensraum).',
     2103: 'Muss namespace/name sein (Namensraum in Kleinbuchstaben, alphanumerische Zeichen/Punkt/Unterstrich/Bindestrich im Namen).',
-    2104: 'Löst einen Namecoin-Namen über den laufenden Knoten auf und zeigt das JSON-Ergebnis an. Entspricht `namecoin-cli name_show <name>`.',
+    2104: 'Löst einen Namecoin-Namen über den laufenden Knoten auf und zeigt das JSON-Ergebnis an, wie es namecoin-cli name_show tut.',
     2105: 'Ergebnis der Namenssuche',
     2106: 'Gefunden: ${name}',
-    2107: 'JSON-Ergebnis',
     2108: 'Namenssuche fehlgeschlagen',
     2109: 'Die Suche nach ${name} ist fehlgeschlagen.',
-    2110: 'Error',
     2400: 'Für ElectrumX konfigurieren',
     2401: 'Bereitet Namecoin Core als Grundlage für einen lokalen ElectrumX-Server vor: erstellt einen RPC-Benutzer für ElectrumX, deaktiviert die Beschneidung (prune=0) und aktiviert den Transaktionsindex (txindex=true). Das erzeugte Passwort wird nur einmal angezeigt — kopieren Sie es sofort nach ElectrumX. War die Beschneidung zuvor aktiviert, wird beim nächsten Start eine vollständige Neuindizierung der Blockchain eingeplant.',
     2402: 'Das Deaktivieren der Beschneidung erfordert eine vollständige (unbeschnittene) Kette. War die Beschneidung zuvor aktiviert, indiziert Namecoin Core beim nächsten Start ab dem Genesis-Block neu — das kann Stunden dauern und benötigt deutlich mehr Speicherplatz (~10–15 GB Kette + ~5 GB ElectrumX-Index).',
@@ -616,6 +614,8 @@ export default {
     2405: 'RPC-Benutzer "${username}" erstellt, Beschneidung deaktiviert, Transaktionsindex aktiviert. Kopieren Sie das untenstehende Passwort in die Aktion "Namecoin Core Connection" von ElectrumX. Das Passwort wird nur EINMAL angezeigt — geht es verloren, müssen Sie einen neuen RPC-Benutzer anlegen. ${reindexNote}',
     2406: 'Die Beschneidung war zuvor aktiviert; Namecoin Core führt beim nächsten Start eine vollständige Neuindizierung der Blockchain durch.',
     2407: 'Keine Neuindizierung erforderlich.',
+    2408: '- Knoten hinzufügen: verbindet sich zusätzlich zu den Peers, die Namecoin selbst findet, mit diesen Knoten.\n- Verbinden: verbindet sich nur mit diesen Knoten. Namecoin baut keine anderen ausgehenden Verbindungen auf.',
+    2409: 'Namecoin vergisst die Peers, die es kennengelernt hat, und sucht beim nächsten Start neue, daher kann der Verbindungsaufbau länger dauern.',
   } satisfies LangDict,
   pl_PL: {
     // main.ts
@@ -654,7 +654,7 @@ export default {
 
     // actions/generateRpcUser.ts
     200: 'Nazwa użytkownika',
-    201: 'Nazwa użytkownika uwierzytelniania RPC',
+    201: 'Nazwa, pod którą klient będzie logował się do interfejsu RPC. Musi różnić się od nazw wszystkich istniejących użytkowników RPC.',
     202: 'Musi być alfanumeryczny (może zawierać podkreślenie).',
     203: 'Generuj dane uwierzytelniające użytkownika RPC',
     204: 'Generuj dane uwierzytelniające użytkownika RPC dla połączeń zdalnych, np. Sparrow. rpcauth.py losowo wygeneruje bezpieczne hasło. Nazwa użytkownika i zahashowane hasło zostaną zachowane w Namecoin.conf',
@@ -664,7 +664,7 @@ export default {
     208: 'Użytkownik RPC utworzony pomyślnie',
     209: 'Hasło RPC utworzone dla ${username}. Przechowuj to hasło w bezpiecznym miejscu. Jeśli zostanie utracone, konieczne będzie utworzenie nowego użytkownika RPC, ponieważ Namecoin.conf przechowuje tylko hash hasła',
     212: 'Nie udało się utworzyć użytkownika RPC',
-    213: 'rpcauth.py zakończył się błędem: ${error}',
+    213: 'rpcauth.py zakończył się błędem. Jego komunikat błędu znajduje się poniżej.',
 
     // actions/generateRpcUserDependent.ts
     300: 'Hasło',
@@ -782,10 +782,10 @@ export default {
 
     // actions/config/peers.ts - Peer settings
     1236: 'Onlynet',
-    1237: 'Nawiązuj automatyczne połączenia wychodzące tylko do wybranych sieci. Połączenia przychodzące i ręczne nie są tym wpływane.',
+    1237: 'Nawiązuje automatyczne połączenia wychodzące tylko z wybranymi sieciami; gdy żadna nie jest wybrana, Namecoin używa wszystkich. Nie dotyczy to połączeń przychodzących ani ręcznych.\n- ipv4, ipv6: peery w clearnecie\n- onion (Tor): wymaga usługi Tor',
 
     1243: 'Użyj protokołu transportowego P2P V2',
-    1244: 'Włącz lub wyłącz użycie protokołu transportowego P2P BIP324 V2.',
+    1244: 'Szyfruje połączenia z peerami, które to obsługują (BIP324), dzięki czemu Twój ruch trudniej obserwować. Peery bez tej obsługi nadal łączą się bez szyfrowania.',
     1245: 'Połącz peera',
     1246: 'Połącz',
     1247: 'Połącz węzły',
@@ -806,9 +806,9 @@ export default {
     1500: 'Zachowaj Mempool',
     1501: 'Zapisz mempool przy wyłączeniu i załaduj przy ponownym uruchomieniu.',
     1502: 'Maksymalny rozmiar Mempool',
-    1503: 'Utrzymuj pulę pamięci transakcji poniżej <n> megabajtów.',
+    1503: 'Utrzymuj pulę pamięci transakcji poniżej tego rozmiaru.',
     1504: 'Wygaśnięcie Mempool',
-    1505: 'Nie przechowuj transakcji w mempoolach dłużej niż <n> godzin.',
+    1505: 'Nie przechowuj transakcji w mempoolu dłużej niż tyle godzin.',
     1506: 'Godz',
     1507: 'Zezwól na Bare Multisig',
     1508: 'Przekazuj transakcje multisig inne niż P2SH',
@@ -836,10 +836,10 @@ export default {
     1700: 'ZeroMQ włączony',
     1701: 'Interfejs ZeroMQ jest przydatny dla niektórych aplikacji, które mogą wymagać danych związanych z blokami i zdarzeniami transakcji z Namecoin Core. Na przykład LND wymaga włączenia ZeroMQ, aby LND otrzymywał najnowsze dane bloku',
     1702: 'Indeks transakcji',
-    1703: 'Włączając indeks transakcji (txindex), Namecoin Core zbuduje pełny indeks transakcji. Pozwala to Namecoin Core na dostęp do dowolnej transakcji za pomocą poleceń takich jak `getrawtransaction`.',
+    1703: 'Włączając indeks transakcji (txindex), Namecoin Core zbuduje pełny indeks transakcji. Pozwala to Namecoin Core na dostęp do dowolnej transakcji za pomocą poleceń takich jak getrawtransaction.',
     1704: 'Za mało miejsca na dysku',
     1705: 'Powiadomienie o bloku',
-    1706: 'Wykonaj dowolne polecenie, gdy zmieni się najlepszy blok',
+    1706: 'Polecenie powłoki, które Namecoin uruchamia w swoim kontenerze przy każdej zmianie najlepszego bloku. %s w poleceniu jest zastępowane hashem bloku.',
     1707: 'Indeks Coinstats',
     1708: 'Włączenie indeksu Coinstats skraca czas wykonania RPC gettxoutsetinfo kosztem użycia dodatkowej przestrzeni dyskowej',
     1709: 'Portfel',
@@ -909,13 +909,11 @@ export default {
     2101: 'Nazwa do wyszukania',
     2102: 'Nazwa Namecoin w formacie przestrzeń/nazwa. Przykłady: d/wikileaks (domena), id/alice (tożsamość), dd/testls (podprzestrzeń DNS).',
     2103: 'Musi mieć postać przestrzeń/nazwa (przestrzeń małymi literami, w nazwie znaki alfanumeryczne/kropka/podkreślenie/myślnik).',
-    2104: 'Rozwiązuje nazwę Namecoin na działającym węźle i wyświetla wynik JSON. Odpowiednik `namecoin-cli name_show <name>`.',
+    2104: 'Rozwiązuje nazwę Namecoin na działającym węźle i wyświetla wynik JSON, tak jak robi to namecoin-cli name_show.',
     2105: 'Wynik wyszukiwania nazwy',
     2106: 'Znaleziono: ${name}',
-    2107: 'Wynik JSON',
     2108: 'Wyszukiwanie nazwy nie powiodło się',
     2109: 'Wyszukiwanie ${name} nie powiodło się.',
-    2110: 'Error',
     2400: 'Skonfiguruj dla ElectrumX',
     2401: 'Przygotowuje Namecoin Core do obsługi lokalnego serwera ElectrumX: tworzy użytkownika RPC dla ElectrumX, wyłącza przycinanie (prune=0) i włącza indeks transakcji (txindex=true). Wygenerowane hasło jest wyświetlane tylko raz — natychmiast skopiuj je do ElectrumX. Jeśli przycinanie było wcześniej włączone, przy następnym uruchomieniu zaplanowane zostanie pełne przeindeksowanie blockchaina.',
     2402: 'Wyłączenie przycinania wymaga pełnego (nieprzyciętego) łańcucha. Jeśli przycinanie było wcześniej włączone, Namecoin Core przy następnym uruchomieniu przeindeksuje łańcuch od bloku genezy — może to potrwać godziny i wymaga znacznie więcej miejsca na dysku (~10–15 GB łańcucha + ~5 GB indeksu ElectrumX).',
@@ -924,6 +922,8 @@ export default {
     2405: 'Utworzono użytkownika RPC "${username}", wyłączono przycinanie, włączono indeks transakcji. Skopiuj poniższe hasło do akcji "Namecoin Core Connection" w ElectrumX. Hasło jest wyświetlane TYLKO RAZ — w razie utraty trzeba utworzyć nowego użytkownika RPC. ${reindexNote}',
     2406: 'Przycinanie było wcześniej włączone; Namecoin Core wykona pełne przeindeksowanie blockchaina przy następnym uruchomieniu.',
     2407: 'Przeindeksowanie nie jest wymagane.',
+    2408: '- Dodaj węzeł: łączy się z tymi węzłami oprócz peerów, które Namecoin znajduje sam.\n- Połącz: łączy się tylko z tymi węzłami. Namecoin nie nawiązuje żadnych innych połączeń wychodzących.',
+    2409: 'Namecoin zapomina poznane peery i przy następnym uruchomieniu szuka nowych, więc nawiązanie połączeń może potrwać dłużej.',
   } satisfies LangDict,
   fr_FR: {
     // main.ts
@@ -962,7 +962,7 @@ export default {
 
     // actions/generateRpcUser.ts
     200: "Nom d'utilisateur",
-    201: "Nom d'utilisateur d'authentification RPC",
+    201: "Le nom avec lequel le client se connectera à l'interface RPC. Il doit être différent de tous les utilisateurs RPC existants.",
     202: 'Doit être alphanumérique (peut contenir un trait de soulignement).',
     203: "Générer les informations d'identification utilisateur RPC",
     204: "Générer les informations d'identification utilisateur RPC pour les connexions distantes, par exemple Sparrow. rpcauth.py générera aléatoirement un mot de passe sécurisé. Le nom d'utilisateur et le mot de passe haché seront conservés dans Namecoin.conf",
@@ -972,7 +972,7 @@ export default {
     208: 'Utilisateur RPC créé avec succès',
     209: "Mot de passe RPC créé pour ${username}. Conservez ce mot de passe dans un endroit sûr. En cas de perte, un nouvel utilisateur RPC devra être créé car Namecoin.conf ne stocke qu'un hachage du mot de passe",
     212: "Échec de la création de l'utilisateur RPC",
-    213: "rpcauth.py a échoué avec l'erreur : ${error}",
+    213: "rpcauth.py a échoué. Sa sortie d'erreur figure ci-dessous.",
 
     // actions/generateRpcUserDependent.ts
     300: 'Mot de passe',
@@ -1090,10 +1090,10 @@ export default {
 
     // actions/config/peers.ts - Peer settings
     1236: 'Onlynet',
-    1237: 'Effectuer automatiquement des connexions sortantes uniquement vers les réseaux sélectionnés. Les connexions entrantes et manuelles ne sont pas affectées.',
+    1237: "N'établit de connexions sortantes automatiques qu'avec les réseaux sélectionnés ; si aucun n'est sélectionné, Namecoin les utilise tous. Les connexions entrantes et manuelles ne sont pas concernées.\n- ipv4, ipv6 : pairs du clearnet\n- onion (Tor) : nécessite le service Tor",
 
     1243: 'Utiliser le protocole de transport P2P V2',
-    1244: "Activer ou désactiver l'utilisation du protocole de transport P2P BIP324 V2.",
+    1244: 'Chiffre les connexions avec les pairs qui le prennent en charge (BIP324), ce qui rend votre trafic plus difficile à observer. Les pairs qui ne le prennent pas en charge se connectent toujours sans chiffrement.',
     1245: 'Connecter un pair',
     1246: 'Connecter',
     1247: 'Connecter aux nœuds',
@@ -1114,9 +1114,9 @@ export default {
     1500: 'Conserver le Mempool',
     1501: "Enregistrer le mempool lors de l'arrêt et le charger au redémarrage.",
     1502: 'Taille maximale du Mempool',
-    1503: 'Maintenir le pool de transactions en mémoire en dessous de <n> mégaoctets.',
+    1503: 'Maintenir le pool de transactions en mémoire en dessous de cette taille.',
     1504: 'Expiration du Mempool',
-    1505: 'Ne pas conserver les transactions dans le mempool plus de <n> heures.',
+    1505: "Ne pas conserver les transactions dans le mempool plus longtemps que ce nombre d'heures.",
     1506: 'Heures',
     1507: 'Autoriser Bare Multisig',
     1508: 'Relayer les transactions multisig non-P2SH',
@@ -1144,10 +1144,10 @@ export default {
     1700: 'ZeroMQ activé',
     1701: "L'interface ZeroMQ est utile pour certaines applications qui peuvent nécessiter des données relatives aux blocs et aux événements de transaction de Namecoin Core. Par exemple, LND nécessite l'activation de ZeroMQ pour que LND reçoive les dernières données de bloc",
     1702: 'Index des transactions',
-    1703: "En activant l'index des transactions (txindex), Namecoin Core construira un index complet des transactions. Cela permet à Namecoin Core d'accéder à n'importe quelle transaction à l'aide de commandes telles que `getrawtransaction`.",
+    1703: "En activant l'index des transactions (txindex), Namecoin Core construira un index complet des transactions. Cela permet à Namecoin Core d'accéder à n'importe quelle transaction à l'aide de commandes telles que getrawtransaction.",
     1704: 'Espace disque insuffisant',
     1705: 'Notification de bloc',
-    1706: 'Exécuter une commande arbitraire lorsque le meilleur bloc change',
+    1706: 'Une commande shell que Namecoin exécute dans son conteneur à chaque changement du meilleur bloc. %s dans la commande est remplacé par le hash du bloc.',
     1707: 'Index Coinstats',
     1708: "L'activation de l'index Coinstats accélère le RPC gettxoutsetinfo au prix de l'utilisation d'espace disque supplémentaire",
     1709: 'Portefeuille',
@@ -1217,13 +1217,11 @@ export default {
     2101: 'Nom à rechercher',
     2102: 'Un nom Namecoin sous la forme espace/nom. Exemples : d/wikileaks (domaine), id/alice (identité), dd/testls (sous-espace DNS).',
     2103: 'Doit être espace/nom (espace en minuscules, caractères alphanumériques/point/trait de soulignement/tiret dans le nom).',
-    2104: "Résout un nom Namecoin sur le nœud en cours d'exécution et affiche le résultat JSON. Équivaut à `namecoin-cli name_show <name>`.",
+    2104: "Résout un nom Namecoin sur le nœud en cours d'exécution et affiche le résultat JSON, comme le fait namecoin-cli name_show.",
     2105: 'Résultat de la recherche de nom',
     2106: 'Trouvé : ${name}',
-    2107: 'Résultat JSON',
     2108: 'Échec de la recherche de nom',
     2109: 'La recherche de ${name} a échoué.',
-    2110: 'Error',
     2400: 'Configurer pour ElectrumX',
     2401: "Prépare Namecoin Core à servir de base à un serveur ElectrumX local : crée un utilisateur RPC pour ElectrumX, désactive l'élagage (prune=0) et active l'index des transactions (txindex=true). Le mot de passe généré n'est affiché qu'une seule fois — copiez-le immédiatement dans ElectrumX. Si l'élagage était activé auparavant, une réindexation complète de la blockchain sera planifiée au prochain démarrage.",
     2402: "Désactiver l'élagage nécessite une chaîne complète (non élaguée). Si l'élagage était activé auparavant, Namecoin Core réindexera depuis le bloc de genèse au prochain démarrage — cela peut prendre des heures et exige beaucoup plus d'espace disque (~10–15 Go de chaîne + ~5 Go d'index ElectrumX).",
@@ -1232,5 +1230,7 @@ export default {
     2405: "Utilisateur RPC \"${username}\" créé, élagage désactivé, index des transactions activé. Copiez le mot de passe ci-dessous dans l'action \"Namecoin Core Connection\" d'ElectrumX. Le mot de passe n'est affiché qu'UNE SEULE FOIS — s'il est perdu, vous devrez créer un nouvel utilisateur RPC. ${reindexNote}",
     2406: "L'élagage était activé auparavant ; Namecoin Core effectuera une réindexation complète de la blockchain au prochain démarrage.",
     2407: 'Aucune réindexation requise.',
+    2408: "- Ajouter un nœud : se connecte à ces nœuds en plus des pairs que Namecoin trouve lui-même.\n- Connecter : se connecte uniquement à ces nœuds. Namecoin n'établit aucune autre connexion sortante.",
+    2409: "Namecoin oublie les pairs qu'il a appris et en cherche de nouveaux à son prochain démarrage ; la connexion peut donc prendre plus de temps.",
   } satisfies LangDict,
 }

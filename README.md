@@ -98,13 +98,13 @@ The store carries only package state: two "do this on the next start" reindex fl
 
 ## Dependencies
 
-One, optional, and **declared only while it is in use**.
+One, optional, and **required only while it is in use**.
 
 | Dependency | Required               | Kind      | Why                       |
 | ---------- | ---------------------- | --------- | ------------------------- |
 | Tor        | No — only if Tor is on | `running` | Reaching peers over onion |
 
-The dependency appears when an onion address is advertised on the Peer interface or when the network is restricted to onion, and disappears otherwise.
+The optional dependency is declared once in `startos/dependencies.ts`; its `enabled` watcher turns on the running requirement when an onion address is advertised on the Peer interface or when the network is restricted to onion, and turns it off otherwise.
 
 **The Tor SOCKS address is resolved with a fallback**, so it stays constant whether Tor is installed, updated, or removed — installing Tor never restarts the node, and a dead address is simply a refused connection until Tor is up.
 
@@ -138,7 +138,7 @@ The node then syncs the Namecoin chain. The sync check distinguishes the phases 
 
 ## Actions
 
-Seventeen actions, in five groups plus two ungrouped.
+Seventeen actions, in four groups plus three ungrouped.
 
 ### Configuration
 
@@ -166,7 +166,7 @@ Prepares the node to back a local ElectrumX server: generates an RPC user for it
 
 #### Name Lookup
 
-Looks up a Namecoin name and shows its current value.
+Looks up a Namecoin name and shows the node's JSON answer, or its error, in a copyable box.
 
 - **Requires the service to be running**; it queries the node over RPC from a temporary container using the cookie.
 - Expired names return an error from the node rather than a value, since resolving them needs an option this package does not enable.
@@ -178,10 +178,11 @@ Looks up a Namecoin name and shows its current value.
 Creates a username and a randomly generated password for remote RPC, storing only the hash in the configuration.
 
 - **The password is shown once.** Only its hash is persisted, so it cannot be recovered afterwards — generate a new one instead.
+- If `rpcauth.py` fails, its error output is shown in a copyable box; Configure for ElectrumX does the same.
 
-#### Delete RPC User
+#### Delete RPC Users
 
-Removes a previously generated credential.
+Removes one or more previously generated credentials.
 
 ### Reindex
 
@@ -197,11 +198,11 @@ Both set a flag that the next start consumes and clears, so the reindex happens 
 
 ### Delete Corrupted Files
 
-#### Delete Transaction Index, Delete Coinstats Index, Delete Peers
+#### Delete Transaction Index, Delete Coinstats Index, Delete Peer List
 
 Three targeted deletions for a node that will not start.
 
-- **All three require the service to be stopped.**
+- **All three require the service to be stopped**, and each asks for confirmation before it runs.
 - Each removes something the node rebuilds: the transaction index, the coin statistics index, or the peer database.
 
 ### Ungrouped
@@ -213,6 +214,10 @@ Reports the node's network and chain state — connection counts, chain height, 
 #### Auto-Configure
 
 Hidden. It lets a dependent service write the node settings it needs, with the fields it supplies locked in the form.
+
+#### Create RPC Credentials
+
+Hidden. A dependent service supplies a username and password, and the action stores the hashed `rpcauth` entry for them.
 
 ## Tasks
 
@@ -275,7 +280,7 @@ file_models:
   - store.json # reindex flags, fullySynced, snapshotInUse
 startos_managed_env_vars: [] # configuration is namecoin.conf plus computed CLI args
 dependencies:
-  - tor # optional, kind: running, declared only when onion is advertised or forced
+  - tor # optional, kind: running, enabled only when onion is advertised or forced
 interfaces:
   rpc: { type: api, port: 8336 } # cookie auth, or a hashed rpcauth entry
   peer: { type: p2p, port: 8334 } # internal bind is a different port

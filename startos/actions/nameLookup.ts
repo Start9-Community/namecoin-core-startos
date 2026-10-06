@@ -45,7 +45,7 @@ export const nameLookup = sdk.Action.withInput(
   async () => ({
     name: i18n('Name Lookup'),
     description: i18n(
-      'Resolve a Namecoin name against the running node and display the JSON result. Equivalent to `namecoin-cli name_show <name>`.',
+      'Resolve a Namecoin name against the running node and display the JSON result, as namecoin-cli name_show does.',
     ),
     warning: null,
     allowedStatuses: 'only-running',
@@ -81,9 +81,7 @@ export const nameLookup = sdk.Action.withInput(
         title: i18n('Name Lookup Result'),
         message: i18n('Found: ${name}', { name }),
         result: {
-          type: 'single',
-          name: i18n('JSON Result'),
-          description: null,
+          type: 'multiline',
           value: stdout.trim(),
           copyable: true,
           qr: false,
@@ -100,9 +98,7 @@ export const nameLookup = sdk.Action.withInput(
       title: i18n('Name Lookup Failed'),
       message: i18n('Lookup of ${name} failed.', { name }),
       result: {
-        type: 'single',
-        name: i18n('Error'),
-        description: null,
+        type: 'multiline',
         value: errText,
         copyable: true,
         qr: false,
