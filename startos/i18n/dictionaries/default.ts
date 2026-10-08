@@ -37,7 +37,7 @@ const dict = {
 
   // actions/generateRpcUser.ts
   Username: 200,
-  'RPC Auth Username': 201,
+  'The name the client will log in to the RPC interface with. It must differ from every existing RPC user.': 201,
   'Must be alphanumeric (can contain underscore).': 202,
   'Generate RPC User Credentials': 203,
   'Generate RPC User Credentials for remote connections i.e. Sparrow. rpcauth.py will randomly generate a secure password. The username and hashed password will be persisted in Namecoin.conf': 204,
@@ -47,7 +47,7 @@ const dict = {
   'RPC user successfully created': 208,
   'RPC password created for ${username}. Store this password in a secure place. If lost, a new RPC user will need to be created as Namecoin.conf only stores a hash of the password': 209,
   'Failed to create RPC user': 212,
-  'rpcauth.py failed with error: ${error}': 213,
+  'rpcauth.py failed. Its error output is below.': 213,
 
   // actions/generateRpcUserDependent.ts
   Password: 300,
@@ -163,9 +163,9 @@ const dict = {
   'Accept Incoming I2P Connections': 1204,
   'Accept inbound I2P connections (effective only when I2P is enabled).': 1205,
   Onlynet: 1236,
-  'Make automatic outbound connections only to the selected networks. Inbound and manual connections are not affected by this option.': 1237,
+  'Make automatic outbound connections only to the selected networks; with none selected, Namecoin uses them all. Inbound and manual connections are not affected.\n- ipv4, ipv6: clearnet peers\n- onion (Tor): needs the Tor service': 1237,
   'Use V2 P2P Transport Protocol': 1243,
-  'Enable or disable the use of BIP324 V2 P2P transport protocol.': 1244,
+  'Encrypt connections with peers that support it (BIP324), so your traffic is harder to observe. Peers without it still connect unencrypted.': 1244,
   'Connect Peer': 1245,
   Connect: 1246,
   'Connect Nodes': 1247,
@@ -186,9 +186,9 @@ const dict = {
   'Persist Mempool': 1500,
   'Save the mempool on shutdown and load on restart.': 1501,
   'Max Mempool Size': 1502,
-  'Keep the transaction memory pool below <n> megabytes.': 1503,
+  'Keep the transaction memory pool below this size.': 1503,
   'Mempool Expiration': 1504,
-  'Do not keep transactions in the mempool longer than <n> hours.': 1505,
+  'Do not keep transactions in the mempool longer than this many hours.': 1505,
   Hr: 1506,
   'Permit Bare Multisig': 1507,
   'Relay non-P2SH multisig transactions': 1508,
@@ -216,10 +216,10 @@ const dict = {
   'ZeroMQ Enabled': 1700,
   'The ZeroMQ interface is useful for some applications which might require data related to block and transaction events from Namecoin Core. For example, LND requires ZeroMQ be enabled for LND to get the latest block data': 1701,
   'Transaction Index': 1702,
-  'By enabling Transaction Index (txindex) Namecoin Core will build a complete transaction index. This allows Namecoin Core to access any transaction with commands like `getrawtransaction`.': 1703,
+  'By enabling Transaction Index (txindex) Namecoin Core will build a complete transaction index. This allows Namecoin Core to access any transaction with commands like getrawtransaction.': 1703,
   'Not enough disk space': 1704,
   'Block Notify': 1705,
-  'Execute an arbitrary command when the best block changes': 1706,
+  'A shell command Namecoin runs inside its container each time the best block changes. %s in the command is replaced by the block hash.': 1706,
   'Coinstats Index': 1707,
   'Enabling Coinstats Index reduces the time for the gettxoutsetinfo RPC to complete at the cost of using additional disk space': 1708,
   Wallet: 1709,
@@ -289,13 +289,11 @@ const dict = {
   'Name to Look Up': 2101,
   'A Namecoin name in namespace/name form. Examples: d/wikileaks (domain), id/alice (identity), dd/testls (DNS sub-namespace).': 2102,
   'Must be namespace/name (lowercase namespace, alphanumerics/dot/underscore/dash in the name).': 2103,
-  'Resolve a Namecoin name against the running node and display the JSON result. Equivalent to `namecoin-cli name_show <name>`.': 2104,
+  'Resolve a Namecoin name against the running node and display the JSON result, as namecoin-cli name_show does.': 2104,
   'Name Lookup Result': 2105,
   'Found: ${name}': 2106,
-  'JSON Result': 2107,
   'Name Lookup Failed': 2108,
   'Lookup of ${name} failed.': 2109,
-  Error: 2110,
 
   // actions/configureForElectrumx.ts
   'Configure for ElectrumX': 2400,
@@ -310,6 +308,8 @@ const dict = {
   // Common
   Configuration: 1800,
   Default: 2000,
+  '- Add Node: connect to these nodes in addition to the peers Namecoin finds itself.\n- Connect: connect only to these nodes. Namecoin makes no other outbound connections.': 2408,
+  'Namecoin forgets the peers it has learned and finds new ones when it next starts, so connecting may take longer.': 2409,
 } as const
 
 /**

@@ -18,19 +18,23 @@ Freshly scaffolded? Work the
 guide page, not a file in this repo — read it, don't copy it in.
 
 Keep `README.md` (technical reference for an AI support or administering agent) and
-`instructions.md` (end-user docs) in sync with your changes.
+`instructions.md` (end-user docs) in sync with your changes. This file restates neither:
+whoever changes the package has both, so it carries only what they don't — repo mechanics,
+a change that looks right and is not, where the next thing gets added, a naming trap, a
+build or test invocation particular to this repo.
 
-**Bugs and feature requests are GitHub issues on this repo** — file them as you find them.
+**Fix a defect you spot rather than reporting it** — you have the package open and the
+context to be sure. File **a GitHub issue on this repo** only when the call isn't yours to
+make: you can't pin the cause down, two defensible fixes exist, or it's too large to ride on
+the work in hand. An open issue is a report, not a queue — implement one when you're asked
+to or when it's labelled `Approved`, then close it with `Closes #<n>`.
+
 Don't record work in the repo instead: no `TODO.md`, no `NOTES.md`, no `PLAN.md`. What you
 verified, tried, and decided belongs in the commit message and the PR body.
 
 ## This repo
 
-- **`0 addresses found from DNS seeds` in the log is normal.** The Namecoin seeders don't serve the `x9.` service-bit prefix namecoind queries, so that lookup always returns nothing; namecoind then reaches the same seeders as addr-fetch peers and bootstraps fine. Don't read it as broken seeds and don't answer it by re-adding a bootstrap `addnode` list.
-- **`addnode=` is a footgun, and `connect=` is not a fix.** namecoind exempts every manually configured peer from misbehavior disconnect/ban ("not punishing manually connected peer"), so one junk peer can saturate the message-handler thread and stall sync — observed stalling at ~55% until _all_ manual peers were removed. That is what `graduate-from-bootstrap` is for; keep its guards (organic outbound count, blocks > 0).
-- **The `.cookie` is removed before every start** and the daemon's `ready` waits for the new one before probing the port — a stale cookie from an unclean shutdown authenticates nothing.
-- **`sigtermTimeout: 300_000` is deliberate.** A chainstate flush can take minutes; cutting it short corrupts the database.
-- **`rpcuser`/`rpcpassword` are `z.undefined().catch(undefined)`**, so a plaintext credential written into `namecoin.conf` is stripped on read. Authentication is the cookie or a hashed `rpcauth` entry.
-- **`dbcache`/`dbbatchsize` are sized at install and reduced by the `synced-true` oneshot** once the node reports fully synced — they exist to speed the initial sync, not to hold memory forever. `dbcache` is pinned to 450 MiB there rather than cleared: namecoind's own default is 1024 MiB on any host reporting 4 GiB or more, so clearing it would raise the post-sync footprint, not lower it.
-- **`watchHosts` owns `externalip`.** It writes the peer interface's onion and public-IPv4 addresses with `allowWriteAfterConst: true`; don't also set `externalip` from an action.
-- **Default branch is `main`, not `master`.** Its CI workflows reference `main`; leave them.
+- **Keep `graduate-from-bootstrap`'s guards (organic outbound count, blocks > 0) and never re-add a bootstrap peer list.** `0 addresses found from DNS seeds` is expected, and namecoind never penalizes a manual peer, so one bad entry stalls sync.
+- **Don't shorten `sigtermTimeout` or clear `dbcache` in `synced-true`.** The chainstate flush needs minutes, and namecoind's own default cache is larger than the pinned 450 MiB.
+- **Only `watchHosts` writes `externalip`.** An action that sets it fights the watcher's `allowWriteAfterConst` write.
+- **Default branch is `main`, not `master`.** The CI workflows name it; leave them.

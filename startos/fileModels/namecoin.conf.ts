@@ -49,7 +49,7 @@ const validNets = ['ipv4', 'ipv6', 'onion'] as const
 const onlyNetOption = z.enum(validNets)
 type ValidNets = z.infer<typeof onlyNetOption>
 
-export const shape = z.object({
+export const shape = z.looseObject({
   // RPC enforced
   rpcbind: z.literal(rpcbind).catch(rpcbind),
   rpcallowip: z.literal(rpcallowip).catch(rpcallowip),
@@ -173,7 +173,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
   }),
   maxmempool: Value.number({
     name: i18n('Max Mempool Size'),
-    description: i18n('Keep the transaction memory pool below <n> megabytes.'),
+    description: i18n('Keep the transaction memory pool below this size.'),
     required: false,
     default: null,
     min: 1,
@@ -184,7 +184,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
   mempoolexpiry: Value.number({
     name: i18n('Mempool Expiration'),
     description: i18n(
-      'Do not keep transactions in the mempool longer than <n> hours.',
+      'Do not keep transactions in the mempool longer than this many hours.',
     ),
     required: false,
     default: null,
@@ -230,7 +230,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
       name: i18n('Transaction Index'),
       default: null,
       description: i18n(
-        'By enabling Transaction Index (txindex) Namecoin Core will build a complete transaction index. This allows Namecoin Core to access any transaction with commands like `getrawtransaction`.',
+        'By enabling Transaction Index (txindex) Namecoin Core will build a complete transaction index. This allows Namecoin Core to access any transaction with commands like getrawtransaction.',
       ),
       footnote: `${i18n('Default')}: false`,
       disabled:
@@ -242,7 +242,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
     required: false,
     default: null,
     description: i18n(
-      'Execute an arbitrary command when the best block changes',
+      'A shell command Namecoin runs inside its container each time the best block changes. %s in the command is replaced by the block hash.',
     ),
   }),
   coinstatsindex: Value.triState({
@@ -370,7 +370,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
   onlynet: Value.multiselect({
     name: i18n('Onlynet'),
     description: i18n(
-      'Make automatic outbound connections only to the selected networks. Inbound and manual connections are not affected by this option.',
+      'Make automatic outbound connections only to the selected networks; with none selected, Namecoin uses them all. Inbound and manual connections are not affected.\n- ipv4, ipv6: clearnet peers\n- onion (Tor): needs the Tor service',
     ),
     values: Object.fromEntries(
       validNets.map((n) => [n, n === 'onion' ? 'onion (Tor)' : n]),
@@ -380,13 +380,16 @@ export const fullConfigSpec = sdk.InputSpec.of({
   v2transport: Value.triState({
     name: i18n('Use V2 P2P Transport Protocol'),
     description: i18n(
-      'Enable or disable the use of BIP324 V2 P2P transport protocol.',
+      'Encrypt connections with peers that support it (BIP324), so your traffic is harder to observe. Peers without it still connect unencrypted.',
     ),
     default: null,
     footnote: `${i18n('Default')}: true`,
   }),
   connectpeer: Value.union({
     name: i18n('Connect Peer'),
+    description: i18n(
+      '- Add Node: connect to these nodes in addition to the peers Namecoin finds itself.\n- Connect: connect only to these nodes. Namecoin makes no other outbound connections.',
+    ),
     default: 'addnode',
     variants: Variants.of({
       connect: {
