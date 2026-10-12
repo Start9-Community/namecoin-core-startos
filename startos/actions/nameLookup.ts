@@ -85,6 +85,7 @@ export const nameLookup = sdk.Action.withInput(
           value: stdout.trim(),
           copyable: true,
           qr: false,
+          filename: null,
           masked: false,
         },
       }
@@ -102,6 +103,7 @@ export const nameLookup = sdk.Action.withInput(
         value: errText,
         copyable: true,
         qr: false,
+        filename: null,
         masked: false,
       },
     }

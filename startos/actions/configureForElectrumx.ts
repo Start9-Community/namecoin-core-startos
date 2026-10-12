@@ -81,6 +81,7 @@ export const configureForElectrumx = sdk.Action.withInput(
           copyable: true,
           masked: false,
           qr: false,
+          filename: null,
         },
       }
     }
@@ -128,6 +129,7 @@ export const configureForElectrumx = sdk.Action.withInput(
         copyable: true,
         masked: true,
         qr: false,
+        launchable: false,
       },
     }
   },

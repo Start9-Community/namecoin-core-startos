@@ -93,6 +93,7 @@ function getConnections(networkInfoRaw: GetNetworkInfo): T.ActionResultMember {
     copyable: false,
     masked: false,
     qr: false,
+    launchable: false,
   }
 }
 
@@ -108,6 +109,7 @@ function getBlockchainSummary(
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -117,6 +119,7 @@ function getBlockchainSummary(
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -132,6 +135,7 @@ function getBlockchainSummary(
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
   ]
 }
@@ -165,6 +169,7 @@ function getSoftforks(
         copyable: false,
         masked: false,
         qr: false,
+        launchable: false,
       },
       {
         type: 'single',
@@ -176,6 +181,7 @@ function getSoftforks(
         copyable: false,
         masked: false,
         qr: false,
+        launchable: false,
       },
       {
         type: 'single',
@@ -187,6 +193,7 @@ function getSoftforks(
         copyable: false,
         masked: false,
         qr: false,
+        launchable: false,
       },
     ]
 
@@ -216,6 +223,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -227,6 +235,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -238,6 +247,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -249,6 +259,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -260,6 +271,7 @@ function getBip9Flat(bip9: Bip9): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
   ]
 }
@@ -276,6 +288,7 @@ function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -287,6 +300,7 @@ function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -298,6 +312,7 @@ function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -309,6 +324,7 @@ function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
     {
       type: 'single',
@@ -320,6 +336,7 @@ function getBip9StatisticsFlat(statistics: Bip9Stats): T.ActionResultMember[] {
       copyable: false,
       masked: false,
       qr: false,
+      launchable: false,
     },
   ]
 }
