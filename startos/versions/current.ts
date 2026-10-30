@@ -1,18 +1,18 @@
 import { VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '31.1:2',
+  version: '31.1:3',
   releaseNotes: {
     en_US:
-      'Restarting Namecoin Core while it is still starting stops every process of the previous run.',
+      'The instructions cover keeping your home IP private when you publish Namecoin Core through StartTunnel.',
     es_ES:
-      'Reiniciar Namecoin Core mientras aún se está iniciando detiene todos los procesos de la ejecución anterior.',
+      'Las instrucciones explican cómo mantener privada tu IP doméstica cuando publicas Namecoin Core a través de StartTunnel.',
     de_DE:
-      'Ein Neustart von Namecoin Core, während es noch startet, beendet alle Prozesse des vorherigen Laufs.',
+      'Die Anleitung erklärt, wie Ihre Heim-IP-Adresse privat bleibt, wenn Sie Namecoin Core über StartTunnel veröffentlichen.',
     pl_PL:
-      'Ponowne uruchomienie Namecoin Core w trakcie uruchamiania zatrzymuje wszystkie procesy poprzedniego uruchomienia.',
+      'Instrukcje wyjaśniają, jak zachować prywatność domowego adresu IP, gdy publikujesz Namecoin Core przez StartTunnel.',
     fr_FR:
-      "Redémarrer Namecoin Core pendant son démarrage arrête tous les processus de l'exécution précédente.",
+      'Les instructions expliquent comment garder votre IP personnelle privée lorsque vous publiez Namecoin Core via StartTunnel.',
   },
   migrations: {
     up: async ({ effects }) => {},
