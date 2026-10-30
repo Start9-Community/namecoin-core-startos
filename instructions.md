@@ -57,6 +57,8 @@ If **Peer Settings** already lists peers you never added, they came from an earl
 
 Don't be surprised if **Connections** shows `0 in / N out` — StartOS doesn't expose port 8334 publicly by default, so no Namecoin peer can reach your node from the outside. Outbound peers are all you need to sync and use the node. Enable inbound by exposing the Peer interface publicly in **Service Interfaces → Peer** if you want to help the network.
 
+If you publish the **Peer** interface through StartTunnel to keep your home IP private, send Namecoin Core's outbound traffic through that tunnel too. Connections Namecoin Core opens itself to clearnet peers otherwise leave through your home router, so those peers see your home IP. While Namecoin Core is limited to Tor, this doesn't apply. If you use the tunnel for another reason, such as a port your router can't forward, there is nothing to change.
+
 ## Backups
 
 Backups include your wallet and registered names but exclude the blockchain (which is re-synced on restore). **Create a backup before uninstalling or upgrading** — without one, any NMC in the node's wallet and any names you control can be lost permanently.
