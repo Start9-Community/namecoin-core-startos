@@ -1,6 +1,6 @@
 FROM debian:stable-slim AS builder
 
-ARG VERSION=31.1
+ARG VERSION=32.1
 ARG TARGETPLATFORM
 
 WORKDIR /build
