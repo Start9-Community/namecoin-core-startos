@@ -1,18 +1,23 @@
 import { VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '31.1:3',
+  version: '32.1:0',
   releaseNotes: {
-    en_US:
-      'The instructions cover keeping your home IP private when you publish Namecoin Core through StartTunnel.',
-    es_ES:
-      'Las instrucciones explican cómo mantener privada tu IP doméstica cuando publicas Namecoin Core a través de StartTunnel.',
-    de_DE:
-      'Die Anleitung erklärt, wie Ihre Heim-IP-Adresse privat bleibt, wenn Sie Namecoin Core über StartTunnel veröffentlichen.',
-    pl_PL:
-      'Instrukcje wyjaśniają, jak zachować prywatność domowego adresu IP, gdy publikujesz Namecoin Core przez StartTunnel.',
-    fr_FR:
-      'Les instructions expliquent comment garder votre IP personnelle privée lorsque vous publiez Namecoin Core via StartTunnel.',
+    en_US: `Updated Namecoin Core to 32.1.
+
+[Full release notes](https://github.com/namecoin/namecoin-core/releases/tag/nc32.1)`,
+    es_ES: `Namecoin Core actualizado a la versión 32.1.
+
+[Notas de la versión completas](https://github.com/namecoin/namecoin-core/releases/tag/nc32.1)`,
+    de_DE: `Namecoin Core auf 32.1 aktualisiert.
+
+[Vollständige Versionshinweise](https://github.com/namecoin/namecoin-core/releases/tag/nc32.1)`,
+    pl_PL: `Zaktualizowano Namecoin Core do wersji 32.1.
+
+[Pełne informacje o wydaniu](https://github.com/namecoin/namecoin-core/releases/tag/nc32.1)`,
+    fr_FR: `Namecoin Core mis à jour vers la version 32.1.
+
+[Notes de version complètes](https://github.com/namecoin/namecoin-core/releases/tag/nc32.1)`,
   },
   migrations: {
     up: async ({ effects }) => {},
