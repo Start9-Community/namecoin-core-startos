@@ -8,6 +8,7 @@ import {
   GetBlockchainInfo,
   namecoinCliArgs,
   namecoinMounts,
+  peerPortInternal,
   rootDir,
   rpccookiefile,
   rpcPort,
@@ -55,7 +56,11 @@ export const main = sdk.setupMain(async ({ effects }) => {
     return { cancel: false }
   })
 
-  const namecoinArgs: string[] = [`-onion=${torSocks}`]
+  // The ini writer quotes a value starting with `[`, which namecoind does not unquote.
+  const namecoinArgs: string[] = [
+    `-onion=${torSocks}`,
+    `-bind=[::]:${peerPortInternal}`,
+  ]
 
   if (reindexBlockchain) {
     namecoinArgs.push('-reindex')
