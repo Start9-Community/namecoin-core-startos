@@ -24,6 +24,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         && rm -rf /var/lib/apt/lists/*
 
 COPY assets/release-signing-key.asc /build/release-signing-key.asc
+# VALIDSIG alone does not reject expired or revoked signing keys.
 RUN git -c advice.detachedHead=false clone --depth 1 --branch "nc${VERSION}" \
         https://github.com/namecoin/namecoin-core.git src \
  && cd src \
@@ -31,8 +32,8 @@ RUN git -c advice.detachedHead=false clone --depth 1 --branch "nc${VERSION}" \
  && test "$(git rev-parse HEAD)" = "${NAMECOIN_COMMIT}" \
  && export GNUPGHOME="$(mktemp -d)" \
  && gpg --batch --quiet --import /build/release-signing-key.asc \
- && git verify-tag --raw "nc${VERSION}" 2>&1 \
-        | grep -q "^\[GNUPG:\] VALIDSIG .* ${NAMECOIN_SIGNING_KEY}\$"
+ && git verify-tag --raw "nc${VERSION}" > /build/tag-signature.status 2>&1 \
+ && grep -q "^\[GNUPG:\] VALIDSIG .* ${NAMECOIN_SIGNING_KEY}\$" /build/tag-signature.status
 
 WORKDIR /build/src
 
