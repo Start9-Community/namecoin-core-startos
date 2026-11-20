@@ -1,6 +1,9 @@
 FROM debian:stable-slim AS builder
 
 ARG VERSION=32.1
+ARG NAMECOIN_COMMIT=f58a3f9c875d000e90f85fe8e20dc469de426452
+# Daniel Kraft's release-tag key, listed in upstream's contrib/verify-commits/trusted-keys.
+ARG NAMECOIN_SIGNING_KEY=1142850E6DFF65BA63D688A8B2492AC4A7330737
 ARG TARGETPLATFORM
 
 WORKDIR /build
@@ -10,6 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
         cmake \
         git \
+        gnupg \
         libboost-dev \
         libevent-dev \
         libsqlite3-dev \
@@ -19,12 +23,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         python3 \
         && rm -rf /var/lib/apt/lists/*
 
-# Pin to nc${VERSION} tag on github.com/namecoin/namecoin-core. We don't
-# verify a release-signer GPG quorum here (the way Bitcoin Core does);
-# Namecoin's release-signing infra isn't a 7-of-N quorum yet. Trust is
-# anchored on the pinned git ref + the GitHub TLS chain.
-RUN git clone --depth 1 --branch nc${VERSION} \
-        https://github.com/namecoin/namecoin-core.git src
+COPY assets/release-signing-key.asc /build/release-signing-key.asc
+# VALIDSIG alone does not reject expired or revoked signing keys.
+RUN git -c advice.detachedHead=false clone --depth 1 --branch "nc${VERSION}" \
+        https://github.com/namecoin/namecoin-core.git src \
+ && cd src \
+ && git checkout -q "${NAMECOIN_COMMIT}" \
+ && test "$(git rev-parse HEAD)" = "${NAMECOIN_COMMIT}" \
+ && export GNUPGHOME="$(mktemp -d)" \
+ && gpg --batch --quiet --import /build/release-signing-key.asc \
+ && git verify-tag --raw "nc${VERSION}" > /build/tag-signature.status 2>&1 \
+ && grep -q "^\[GNUPG:\] VALIDSIG .* ${NAMECOIN_SIGNING_KEY}\$" /build/tag-signature.status
 
 WORKDIR /build/src
 
