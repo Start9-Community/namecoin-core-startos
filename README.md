@@ -47,7 +47,7 @@ One image, **built from upstream source** rather than pulled.
 | --------------- | ---------------------------------------- |
 | `namecoind-sub` | The only daemon — the one to `attach` to |
 
-The build clones a pinned upstream tag and compiles it. **There is no release-signer verification** the way Bitcoin Core's packaging does it — Namecoin does not publish a signing quorum, so trust rests on the pinned git ref and GitHub's TLS chain. That is stated here because it is a genuine difference in provenance, not an oversight.
+The build clones a pinned upstream tag, fails unless the tag resolves to the pinned commit and carries a valid signature from Daniel Kraft's release key (the key upstream lists in `contrib/verify-commits/trusted-keys`, kept in `assets/release-signing-key.asc`), and compiles it. That is one signer, not the multi-signer quorum Bitcoin Core's releases carry.
 
 Two oneshots run first:
 
@@ -252,7 +252,7 @@ What the backup keeps is what the network cannot give back: **the wallet**, the 
 
 ## Limitations and Differences
 
-1. **No release-signature verification.** The build pins a git tag; upstream publishes no signing quorum to check against.
+1. **One release signer.** The build verifies the tag's signature from a single upstream key; Namecoin publishes no multi-signer quorum.
 2. **The chain is not backed up.** A restore re-syncs from the network.
 3. **Plaintext RPC credentials cannot be set** in the configuration; they are stripped on read in favor of the cookie or a hashed entry.
 4. **A generated RPC password is shown once** and only its hash is kept.
@@ -267,7 +267,7 @@ What the backup keeps is what the network cannot give back: **the wallet**, the 
 
 ```yaml
 package_id: namecoind # note: the repo is namecoin-core-startos
-image: built from ./Dockerfile # compiled from a pinned upstream git tag
+image: built from ./Dockerfile # compiled from a pinned, signature-checked upstream git tag
 architectures:
   - x86_64
   - aarch64
