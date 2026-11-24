@@ -31,10 +31,8 @@ export default {
     101: 'Escucha comandos JSON-RPC',
     102: 'Interfaz de pares',
     103: 'Escucha conexiones entrantes de pares en la red Namecoin',
-    104: 'Interfaz ZeroMQ',
     105: 'Consola del daemon I2P',
     106: 'Interfaz para acceder a la consola del daemon I2P integrado',
-    107: 'Transmite notificaciones en tiempo real de bloques y transacciones de Namecoin (hashes y datos sin procesar)',
 
     // actions/generateRpcUser.ts
     200: 'Nombre de usuario',
@@ -339,10 +337,8 @@ export default {
     101: 'Wartet auf JSON-RPC-Befehle',
     102: 'Peer-Schnittstelle',
     103: 'Wartet auf eingehende Verbindungen von Peers im Namecoin-Netzwerk',
-    104: 'ZeroMQ-Schnittstelle',
     105: 'I2P-Daemon-Konsole',
     106: 'Schnittstelle zum Zugriff auf die eingebettete I2P-Daemon-Konsole',
-    107: 'Streamt Echtzeit-Benachrichtigungen über Namecoin-Blöcke und Transaktionen (Hashes und Rohdaten)',
 
     // actions/generateRpcUser.ts
     200: 'Benutzername',
@@ -647,10 +643,8 @@ export default {
     101: 'Nasłuchuje poleceń JSON-RPC',
     102: 'Interfejs peerów',
     103: 'Nasłuchuje przychodzących połączeń od peerów w sieci Namecoin',
-    104: 'Interfejs ZeroMQ',
     105: 'Konsola daemona I2P',
     106: 'Interfejs dostępu do konsoli wbudowanego daemona I2P',
-    107: 'Strumieniuje powiadomienia o blokach i transakcjach Namecoin w czasie rzeczywistym (hashe i surowe dane)',
 
     // actions/generateRpcUser.ts
     200: 'Nazwa użytkownika',
@@ -955,10 +949,8 @@ export default {
     101: 'Écoute les commandes JSON-RPC',
     102: 'Interface de pairs',
     103: 'Écoute les connexions entrantes des pairs sur le réseau Namecoin',
-    104: 'Interface ZeroMQ',
     105: 'Console du démon I2P',
     106: 'Interface pour accéder à la console du démon I2P intégré',
-    107: 'Diffuse en temps réel les notifications de blocs et de transactions Namecoin (hachages et données brutes)',
 
     // actions/generateRpcUser.ts
     200: "Nom d'utilisateur",

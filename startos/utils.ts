@@ -8,7 +8,6 @@ export const zmqHostId = 'zmq'
 
 export const rpcInterfaceId = 'rpc'
 export const peerInterfaceId = 'peer'
-export const zmqInterfaceId = 'zmq'
 
 export const zmqPortBlock = 28336
 export const zmqPortTransaction = 28337

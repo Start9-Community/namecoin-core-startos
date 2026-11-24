@@ -9,8 +9,8 @@ import {
   rpcInterfaceId,
   rpcPort,
   zmqHostId,
-  zmqInterfaceId,
   zmqPortBlock,
+  zmqPortTransaction,
 } from './utils'
 import { i18n } from './i18n'
 
@@ -65,31 +65,20 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
 
   receipts.push(peerReceipt)
 
-  // ZMQ (conditional)
+  // ZMQ (conditional). Bridge-only: the topics are unauthenticated and carry
+  // the node's own transactions, so no interface is exported and the ports
+  // never reach the LAN. Dependents resolve each port with getBridgeAddress
+  // by host id and internal port.
   if (namecoinConf.zmqEnabled) {
     const zmqMulti = sdk.MultiHost.of(effects, zmqHostId)
-    const zmqMultiOrigin = await zmqMulti.bindPort(zmqPortBlock, {
-      preferredExternalPort: zmqPortBlock,
-      addSsl: null,
-      secure: { ssl: false },
-      protocol: null,
-    })
-    const zmq = sdk.createInterface(effects, {
-      name: i18n('ZeroMQ Interface'),
-      id: zmqInterfaceId,
-      description: i18n(
-        'Streams real-time Namecoin block and transaction notifications (hashes and raw data)',
-      ),
-      type: 'api',
-      masked: false,
-      schemeOverride: null,
-      username: null,
-      path: '',
-      query: {},
-    })
-    const zmqReceipt = await zmqMultiOrigin.export([zmq])
-
-    receipts.push(zmqReceipt)
+    for (const port of [zmqPortBlock, zmqPortTransaction]) {
+      await zmqMulti.bindPort(port, {
+        preferredExternalPort: port,
+        addSsl: null,
+        secure: { ssl: false },
+        protocol: null,
+      })
+    }
   }
 
   return receipts

@@ -30,10 +30,8 @@ const dict = {
   'Listens for JSON-RPC commands': 101,
   'Peer Interface': 102,
   'Listens for incoming connections from peers on the namecoin network': 103,
-  'ZeroMQ Interface': 104,
   'I2P Daemon Console': 105,
   'Interface to access the embedded I2P daemon console': 106,
-  'Streams real-time Namecoin block and transaction notifications (hashes and raw data)': 107,
 
   // actions/generateRpcUser.ts
   Username: 200,
