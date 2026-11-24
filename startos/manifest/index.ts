@@ -10,7 +10,7 @@ export const manifest = setupManifest({
   upstreamRepo: 'https://github.com/namecoin/namecoin-core',
   marketingUrl: 'https://www.namecoin.org/',
   description: { short, long },
-  volumes: ['main'],
+  volumes: ['main', 'public'],
   images: {
     namecoind: {
       source: {

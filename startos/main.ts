@@ -1,4 +1,4 @@
-import { access, rm } from 'fs/promises'
+import { access, readFile, rename, rm, writeFile } from 'fs/promises'
 import { socksHostId, socksPort } from 'tor-startos/startos/utils'
 import { namecoinConfFile } from './fileModels/namecoin.conf'
 import { storeJson } from './fileModels/store.json'
@@ -10,8 +10,10 @@ import {
   namecoinMounts,
   peerPortInternal,
   rootDir,
+  rpcCookieName,
   rpccookiefile,
   rpcPort,
+  rpcVolumeId,
 } from './utils'
 
 export const main = sdk.setupMain(async ({ effects }) => {
@@ -78,12 +80,15 @@ export const main = sdk.setupMain(async ({ effects }) => {
   )
 
   const rpcCookiePath = `${rootDir}/${rpccookiefile}`
+  const publishedCookie = sdk.volumes[rpcVolumeId].subpath(rpcCookieName)
 
-  // remove cookie file
-  await rm(`${namecoindSub.rootfs}${rpcCookiePath}`, {
-    force: true,
-    recursive: true,
-  })
+  // Remove both cookies, so the published copy's absence means Namecoin is down.
+  for (const path of [
+    `${namecoindSub.rootfs}${rpcCookiePath}`,
+    publishedCookie,
+  ]) {
+    await rm(path, { force: true, recursive: true })
+  }
 
   /**
    * ======================== Daemons ========================
@@ -144,6 +149,21 @@ export const main = sdk.setupMain(async ({ effects }) => {
         },
       },
       requires: ['nocow', 'clean-chainstate-old'],
+    })
+    .addOneshot('publish-rpc', {
+      subcontainer: null,
+      exec: {
+        fn: async () => {
+          await writeFile(
+            `${publishedCookie}.tmp`,
+            await readFile(`${namecoindSub.rootfs}${rpcCookiePath}`, 'utf8'),
+            { mode: 0o600 },
+          )
+          await rename(`${publishedCookie}.tmp`, publishedCookie)
+          return null
+        },
+      },
+      requires: ['namecoind'],
     })
     .addHealthCheck('sync-progress', {
       ready: {

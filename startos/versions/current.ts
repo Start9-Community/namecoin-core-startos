@@ -1,18 +1,18 @@
 import { VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '32.1:2',
+  version: '32.1:3',
   releaseNotes: {
     en_US:
-      "Packaging update: the Namecoin Core source is checked against the exact release and its developer's signature before it is built. Nothing changes in how the node runs.",
+      'Services that depend on Namecoin Core can now connect to it without being able to read its data directory, including the wallet.',
     es_ES:
-      'Actualización del empaquetado: el código fuente de Namecoin Core se verifica contra la versión exacta y la firma de su desarrollador antes de compilarse. No cambia nada en el funcionamiento del nodo.',
+      'Los servicios que dependen de Namecoin Core ahora pueden conectarse a él sin poder leer su directorio de datos, incluida la billetera.',
     de_DE:
-      'Paketierungs-Update: Der Quellcode von Namecoin Core wird vor dem Bauen gegen die exakte Version und die Signatur des Entwicklers geprüft. An der Funktionsweise des Knotens ändert sich nichts.',
+      'Dienste, die von Namecoin Core abhängen, können sich jetzt damit verbinden, ohne sein Datenverzeichnis einschließlich der Wallet lesen zu können.',
     pl_PL:
-      'Aktualizacja pakietu: kod źródłowy Namecoin Core jest sprawdzany względem dokładnego wydania i podpisu jego twórcy przed kompilacją. Działanie węzła się nie zmienia.',
+      'Usługi zależne od Namecoin Core mogą teraz łączyć się z nim bez możliwości odczytu jego katalogu danych, w tym portfela.',
     fr_FR:
-      "Mise à jour de l'empaquetage : le code source de Namecoin Core est vérifié par rapport à la version exacte et à la signature de son développeur avant d'être compilé. Rien ne change dans le fonctionnement du nœud.",
+      "Les services qui dépendent de Namecoin Core peuvent désormais s'y connecter sans pouvoir lire son répertoire de données, portefeuille compris.",
   },
   migrations: {
     up: async ({ effects }) => {},
