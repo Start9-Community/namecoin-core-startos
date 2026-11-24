@@ -21,6 +21,8 @@ For **remote** clients (a desktop wallet, a script on another machine), create c
 
 Then connect to the **RPC** interface (port **8336**) using that username and password. The **Peer** interface listens on port **8334**.
 
+ZeroMQ block and transaction notifications (on by default, under **Other Settings**) are for other services on your server. Apps on other devices cannot subscribe.
+
 To check live status — connections, block height, sync progress — run the **Runtime Information** action.
 
 ### Name operations

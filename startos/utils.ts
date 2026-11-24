@@ -8,7 +8,6 @@ export const zmqHostId = 'zmq'
 
 export const rpcInterfaceId = 'rpc'
 export const peerInterfaceId = 'peer'
-export const zmqInterfaceId = 'zmq'
 
 export const zmqPortBlock = 28336
 export const zmqPortTransaction = 28337
@@ -24,6 +23,10 @@ export const rpcallowip = '0.0.0.0/0'
 
 export const rootDir = '/root/.namecoin'
 export const rpccookiefile = '.cookie'
+
+/** The volume dependents mount read-only for RPC, holding a copy namecoind never touches — mount the volume, never a file in it, which each start replaces. */
+export const rpcVolumeId = 'public'
+export const rpcCookieName = '.cookie'
 
 export const namecoinMounts = sdk.Mounts.of().mountVolume({
   volumeId: 'main',

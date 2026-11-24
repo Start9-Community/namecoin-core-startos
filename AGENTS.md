@@ -38,3 +38,4 @@ verified, tried, and decided belongs in the commit message and the PR body.
 - **Don't shorten `sigtermTimeout` or clear `dbcache` in `synced-true`.** The chainstate flush needs minutes, and namecoind's own default cache is larger than the pinned 450 MiB.
 - **Only `watchHosts` writes `externalip`.** An action that sets it fights the watcher's `allowWriteAfterConst` write.
 - **Default branch is `main`, not `master`.** The CI workflows name it; leave them.
+- **Never export an interface on the `zmq` host.** Exporting one puts the binding on the LAN by default, and ZeroMQ is unauthenticated; dependents resolve it with `getBridgeAddress`, which needs no interface.
