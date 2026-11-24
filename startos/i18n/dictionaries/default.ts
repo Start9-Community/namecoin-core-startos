@@ -212,7 +212,7 @@ const dict = {
 
   // actions/config/other.ts
   'ZeroMQ Enabled': 1700,
-  'The ZeroMQ interface is useful for some applications which might require data related to block and transaction events from Namecoin Core. For example, LND requires ZeroMQ be enabled for LND to get the latest block data': 1701,
+  'Publishes real-time block and transaction notifications for apps that react to new blocks and transactions instead of polling RPC. Other services on this server can subscribe; devices on your network cannot.': 1701,
   'Transaction Index': 1702,
   'By enabling Transaction Index (txindex) Namecoin Core will build a complete transaction index. This allows Namecoin Core to access any transaction with commands like getrawtransaction.': 1703,
   'Not enough disk space': 1704,

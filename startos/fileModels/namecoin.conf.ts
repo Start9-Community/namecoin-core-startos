@@ -219,7 +219,7 @@ export const fullConfigSpec = sdk.InputSpec.of({
   zmqEnabled: Value.triState({
     name: i18n('ZeroMQ Enabled'),
     description: i18n(
-      'The ZeroMQ interface is useful for some applications which might require data related to block and transaction events from Namecoin Core. For example, LND requires ZeroMQ be enabled for LND to get the latest block data',
+      'Publishes real-time block and transaction notifications for apps that react to new blocks and transactions instead of polling RPC. Other services on this server can subscribe; devices on your network cannot.',
     ),
     default: true,
     footnote: `${i18n('Default')}: false`,

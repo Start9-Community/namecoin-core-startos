@@ -216,7 +216,7 @@ export default {
 
     // actions/config/other.ts
     1700: 'ZeroMQ habilitado',
-    1701: 'La interfaz ZeroMQ es útil para algunas aplicaciones que pueden requerir datos relacionados con eventos de bloques y transacciones de Namecoin Core. Por ejemplo, LND requiere que ZeroMQ esté habilitado para que LND obtenga los datos de bloque más recientes',
+    1701: 'Publica notificaciones en tiempo real de bloques y transacciones para aplicaciones que reaccionan a nuevos bloques y transacciones en lugar de consultar la RPC. Otros servicios de este servidor pueden suscribirse; los dispositivos de su red no.',
     1702: 'Índice de transacciones',
     1703: 'Al habilitar el índice de transacciones (txindex), Namecoin Core construirá un índice de transacciones completo. Esto permite que Namecoin Core acceda a cualquier transacción con comandos como getrawtransaction.',
     1704: 'No hay suficiente espacio en disco',
@@ -522,7 +522,7 @@ export default {
 
     // actions/config/other.ts
     1700: 'ZeroMQ aktiviert',
-    1701: 'Die ZeroMQ-Schnittstelle ist nützlich für einige Anwendungen, die Daten zu Block- und Transaktionsereignissen von Namecoin Core benötigen könnten. Beispielsweise muss LND ZeroMQ aktiviert haben, damit LND die neuesten Blockdaten erhält',
+    1701: 'Veröffentlicht Echtzeit-Benachrichtigungen zu Blöcken und Transaktionen für Apps, die auf neue Blöcke und Transaktionen reagieren, statt die RPC abzufragen. Andere Dienste auf diesem Server können sie abonnieren; Geräte in Ihrem Netzwerk nicht.',
     1702: 'Transaktionsindex',
     1703: 'Durch Aktivieren des Transaktionsindex (txindex) erstellt Namecoin Core einen vollständigen Transaktionsindex. Dadurch kann Namecoin Core mit Befehlen wie getrawtransaction auf jede Transaktion zugreifen.',
     1704: 'Nicht genügend Speicherplatz',
@@ -828,7 +828,7 @@ export default {
 
     // actions/config/other.ts
     1700: 'ZeroMQ włączony',
-    1701: 'Interfejs ZeroMQ jest przydatny dla niektórych aplikacji, które mogą wymagać danych związanych z blokami i zdarzeniami transakcji z Namecoin Core. Na przykład LND wymaga włączenia ZeroMQ, aby LND otrzymywał najnowsze dane bloku',
+    1701: 'Publikuje powiadomienia w czasie rzeczywistym o blokach i transakcjach dla aplikacji, które reagują na nowe bloki i transakcje zamiast odpytywać RPC. Inne usługi na tym serwerze mogą je subskrybować; urządzenia w Twojej sieci nie.',
     1702: 'Indeks transakcji',
     1703: 'Włączając indeks transakcji (txindex), Namecoin Core zbuduje pełny indeks transakcji. Pozwala to Namecoin Core na dostęp do dowolnej transakcji za pomocą poleceń takich jak getrawtransaction.',
     1704: 'Za mało miejsca na dysku',
@@ -1134,7 +1134,7 @@ export default {
 
     // actions/config/other.ts
     1700: 'ZeroMQ activé',
-    1701: "L'interface ZeroMQ est utile pour certaines applications qui peuvent nécessiter des données relatives aux blocs et aux événements de transaction de Namecoin Core. Par exemple, LND nécessite l'activation de ZeroMQ pour que LND reçoive les dernières données de bloc",
+    1701: "Publie en temps réel des notifications de blocs et de transactions pour les applications qui réagissent aux nouveaux blocs et transactions au lieu d'interroger le RPC. Les autres services de ce serveur peuvent s'y abonner ; les appareils de votre réseau non.",
     1702: 'Index des transactions',
     1703: "En activant l'index des transactions (txindex), Namecoin Core construira un index complet des transactions. Cela permet à Namecoin Core d'accéder à n'importe quelle transaction à l'aide de commandes telles que getrawtransaction.",
     1704: 'Espace disque insuffisant',
