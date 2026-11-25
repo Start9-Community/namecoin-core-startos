@@ -14,6 +14,10 @@ export const zmqPortTransaction = 28337
 
 export const peerPortExternal = 8334
 export const peerPortInternal = 58334
+/** Container port Tor forwards onion peers to; relayed to `peerPortOnionLoopback`. */
+export const peerPortOnion = 58335
+/** Port namecoind binds `=onion` on loopback, where it expects its Tor peers to arrive from. */
+export const peerPortOnionLoopback = 58336
 
 export const rpcPort = 8336
 

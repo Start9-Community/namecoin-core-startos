@@ -75,6 +75,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         libsqlite3-0 \
         libzmq5 \
         python3 \
+        socat \
         tini \
         && rm -rf /var/lib/apt/lists/*
 

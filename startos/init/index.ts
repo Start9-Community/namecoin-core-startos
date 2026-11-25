@@ -4,6 +4,7 @@ import { dependencies } from '../dependencies'
 import { versionGraph } from '../versions'
 import { setInterfaces } from '../interfaces'
 import { sdk } from '../sdk'
+import { onionTarget } from './onionTarget'
 import { seedFiles } from './seedFiles'
 import { watchHosts } from './watchHosts'
 
@@ -15,6 +16,7 @@ export const init = sdk.setupInit(
   actions,
   dependencies,
   watchHosts,
+  onionTarget,
 )
 
 export const uninit = sdk.setupUninit(versionGraph)
