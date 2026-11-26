@@ -9,6 +9,8 @@ import {
   namecoinCliArgs,
   namecoinMounts,
   peerPortInternal,
+  peerPortOnion,
+  peerPortOnionLoopback,
   rootDir,
   rpcCookieName,
   rpccookiefile,
@@ -58,10 +60,13 @@ export const main = sdk.setupMain(async ({ effects }) => {
     return { cancel: false }
   })
 
-  // The ini writer quotes a value starting with `[`, which namecoind does not unquote.
+  // The ini writer quotes a value starting with `[`, which namecoind does not
+  // unquote. namecoind merges these binds with namecoin.conf's IPv4 one.
   const namecoinArgs: string[] = [
     `-onion=${torSocks}`,
+    '-listenonion=0',
     `-bind=[::]:${peerPortInternal}`,
+    `-bind=127.0.0.1:${peerPortOnionLoopback}=onion`,
   ]
 
   if (reindexBlockchain) {
@@ -149,6 +154,26 @@ export const main = sdk.setupMain(async ({ effects }) => {
         },
       },
       requires: ['nocow', 'clean-chainstate-old'],
+    })
+    // Onion peers reach namecoind from 127.0.0.1, the one source it never discourages as a whole.
+    .addDaemon('onion-relay', {
+      subcontainer: namecoindSub,
+      exec: {
+        command: [
+          'socat',
+          `TCP-LISTEN:${peerPortOnion},fork,reuseaddr`,
+          `TCP:127.0.0.1:${peerPortOnionLoopback}`,
+        ],
+      },
+      ready: {
+        display: null,
+        fn: () =>
+          sdk.healthCheck.checkPortListening(effects, peerPortOnion, {
+            successMessage: 'Onion relay is listening',
+            errorMessage: 'Onion relay is not listening',
+          }),
+      },
+      requires: [],
     })
     .addOneshot('publish-rpc', {
       subcontainer: null,

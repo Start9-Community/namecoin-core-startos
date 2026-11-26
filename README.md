@@ -43,9 +43,9 @@ One image, **built from upstream source** rather than pulled.
 | Architectures | x86_64, aarch64                                |
 | Command       | `namecoind`, against the managed configuration |
 
-| Subcontainer    | Purpose                                  |
-| --------------- | ---------------------------------------- |
-| `namecoind-sub` | The only daemon — the one to `attach` to |
+| Subcontainer    | Purpose                                                                       |
+| --------------- | ----------------------------------------------------------------------------- |
+| `namecoind-sub` | `namecoind` — the one to `attach` to — and the `onion-relay` daemon (`socat`) |
 
 The build clones a pinned upstream tag, fails unless the tag resolves to the pinned commit and carries a valid signature from Daniel Kraft's release key (the key upstream lists in `contrib/verify-commits/trusted-keys`, kept in `assets/release-signing-key.asc`), and compiles it. That is one signer, not the multi-signer quorum Bitcoin Core's releases carry.
 
@@ -109,7 +109,7 @@ One, optional, and **required only while it is in use**.
 | ---------- | ---------------------- | --------- | ------------------------- |
 | Tor        | No — only if Tor is on | `running` | Reaching peers over onion |
 
-The optional dependency is declared once in `startos/dependencies.ts`; its `enabled` watcher turns on the running requirement when an onion address is advertised on the Peer interface or when the network is restricted to onion, and turns it off otherwise.
+The optional dependency is declared once in `startos/dependencies.ts`; its `enabled` watcher turns on the running requirement when an onion address is advertised on the Peer interface or when the network is restricted to onion, and turns it off otherwise. The version range asks for `0.4.9.17:4` or later, the first Tor with Set Onion Target.
 
 **The Tor SOCKS address is resolved with a fallback**, so it stays constant whether Tor is installed, updated, or removed — installing Tor never restarts the node, and a dead address is simply a refused connection until Tor is up.
 
@@ -125,6 +125,10 @@ Two interfaces. A third host, `zmq`, binds ports with no interface attached whil
 | Peer      | `peer` | p2p  | 8334 | The Namecoin peer network            |
 
 **The peer binding maps two different ports.** The daemon listens internally on one port and is published externally on the standard one, which is what lets StartOS front the standard port while the node also keeps a separate internal bind for connections arriving over the bridge.
+
+The package passes `-listenonion=0`, so the daemon never tries to create its own onion service through a Tor control port: the StartOS Tor service owns the onion addresses.
+
+**Onion peers have a listener of their own.** An init step asks Tor, through `tor-startos`'s `setupOnionTarget`, to forward the Peer interface's onion addresses to container port 58335 instead of 58334, and repeats the request whenever Tor is installed or updated. The package clears the target on uninstall and on a rollback, and Tor uses it only while it is bound, so a version or flavor without the relay gets the old forward back. The `onion-relay` daemon, `socat` in the namecoind image, passes each connection on to namecoind's `127.0.0.1:58336=onion` listener, passed as a `-bind` argument beside the IPv6 one (namecoind merges command-line binds with `namecoin.conf`'s IPv4 `bind`). Namecoin Core therefore knows those peers arrived over Tor: it advertises only its onion address to them, never the public IPv4 in `externalip`, and gives them the eviction protection it reserves for onion peers. Because they reach namecoind from loopback, a misbehaving one is disconnected without its address being discouraged, which would otherwise refuse every onion peer at once. The 58335 binding sits on the `peer` host with no exported interface, so it stays on loopback and the LXC bridge. A Tor older than `0.4.9.17:4` has no Set Onion Target and forwards to 58334, where onion peers are indistinguishable from clearnet ones.
 
 **`zmq` is bridge-only.** While ZeroMQ is enabled (the default on a fresh install), namecoind publishes `rawblock` and `hashblock` on container port 28336 and `rawtx`, `hashtx`, and `sequence` on 28337. ZeroMQ has no authentication, and those topics include the node's own transactions as it broadcasts them, so the `zmq` host binds both ports with no exported interface, which keeps them on loopback and the LXC bridge — never the LAN, never the internet. A dependent resolves each port on its own with `sdk.host.getBridgeAddress({ packageId: 'namecoind', hostId: zmqHostId, internalPort: zmqPortBlock })` (or `zmqPortTransaction`). An app running off the server cannot subscribe.
 
@@ -288,7 +292,7 @@ dependencies:
   - tor # optional, kind: running, enabled only when onion is advertised or forced
 interfaces:
   rpc: { type: api, port: 8336 } # cookie auth, or a hashed rpcauth entry
-  peer: { type: p2p, port: 8334 } # internal bind is a different port
+  peer: { type: p2p, port: 8334 } # container 58334; onions forward to 58335 (relayed to 127.0.0.1:58336=onion)
   # zmq: no interface; 28336 and 28337 bridge-only, bound only while ZMQ is enabled
 actions:
   - peers-config

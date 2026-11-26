@@ -1,21 +1,25 @@
+import { clearOnionTarget } from 'tor-startos/startos/utils/target'
+import { onionBinding } from '../init/onionTarget'
+import { sdk } from '../sdk'
 import { VersionInfo } from '@start9labs/start-sdk'
 
 export const current = VersionInfo.of({
-  version: '32.1:3',
+  version: '32.1:4',
   releaseNotes: {
     en_US:
-      'Requires StartOS 0.4.2 or later. Services that depend on Namecoin Core can now connect to it without being able to read its data directory, including the wallet. ZeroMQ notifications are no longer reachable from other devices on your network; services on your server still receive them.',
+      'Peers that connect through your .onion address learn only that address, never your public IP address, and a misbehaving one is disconnected without affecting your other onion peers. Requires Tor 0.4.9.17:4 or later.',
     es_ES:
-      'Requiere StartOS 0.4.2 o posterior. Los servicios que dependen de Namecoin Core ahora pueden conectarse a él sin poder leer su directorio de datos, incluida la billetera. Las notificaciones ZeroMQ ya no son accesibles desde otros dispositivos de su red; los servicios de su servidor siguen recibiéndolas.',
+      'Los pares que se conectan a través de su dirección .onion solo conocen esa dirección, nunca su dirección IP pública, y uno que se comporte mal se desconecta sin afectar a sus demás pares onion. Requiere Tor 0.4.9.17:4 o posterior.',
     de_DE:
-      'Erfordert StartOS 0.4.2 oder neuer. Dienste, die von Namecoin Core abhängen, können sich jetzt damit verbinden, ohne sein Datenverzeichnis einschließlich der Wallet lesen zu können. ZeroMQ-Benachrichtigungen sind von anderen Geräten in Ihrem Netzwerk nicht mehr erreichbar; Dienste auf Ihrem Server erhalten sie weiterhin.',
+      'Peers, die sich über Ihre .onion-Adresse verbinden, erfahren nur diese Adresse, nie Ihre öffentliche IP-Adresse, und ein Peer, der sich fehlverhält, wird getrennt, ohne Ihre anderen Onion-Peers zu beeinträchtigen. Erfordert Tor 0.4.9.17:4 oder neuer.',
     pl_PL:
-      'Wymaga StartOS 0.4.2 lub nowszego. Usługi zależne od Namecoin Core mogą teraz łączyć się z nim bez możliwości odczytu jego katalogu danych, w tym portfela. Powiadomienia ZeroMQ nie są już dostępne z innych urządzeń w Twojej sieci; usługi na Twoim serwerze nadal je otrzymują.',
+      'Węzły łączące się przez Twój adres .onion poznają tylko ten adres, nigdy Twojego publicznego adresu IP, a węzeł, który źle się zachowuje, zostaje rozłączony bez wpływu na pozostałe węzły onion. Wymaga Tor 0.4.9.17:4 lub nowszego.',
     fr_FR:
-      "Nécessite StartOS 0.4.2 ou une version ultérieure. Les services qui dépendent de Namecoin Core peuvent désormais s'y connecter sans pouvoir lire son répertoire de données, portefeuille compris. Les notifications ZeroMQ ne sont plus accessibles depuis les autres appareils de votre réseau ; les services de votre serveur les reçoivent toujours.",
+      'Les pairs qui se connectent via votre adresse .onion ne connaissent que cette adresse, jamais votre adresse IP publique, et un pair au comportement abusif est déconnecté sans affecter vos autres pairs onion. Nécessite Tor 0.4.9.17:4 ou une version ultérieure.',
   },
   migrations: {
     up: async ({ effects }) => {},
-    down: async ({ effects }) => {},
+    // The version rolled back to sets its own target if it has the relay.
+    down: async ({ effects }) => clearOnionTarget(sdk, effects, onionBinding),
   },
 })

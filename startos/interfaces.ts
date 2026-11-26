@@ -5,6 +5,7 @@ import {
   peerInterfaceId,
   peerPortExternal,
   peerPortInternal,
+  peerPortOnion,
   rpcHostId,
   rpcInterfaceId,
   rpcPort,
@@ -15,9 +16,9 @@ import {
 import { i18n } from './i18n'
 
 export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
-  let namecoinConf = await namecoinConfFile.read().const(effects)
-
-  if (!namecoinConf) return []
+  const zmqEnabled = await namecoinConfFile
+    .read((c) => c.zmqEnabled)
+    .const(effects)
 
   // RPC
   const rpcMulti = sdk.MultiHost.of(effects, rpcHostId)
@@ -42,6 +43,13 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
 
   // Peer
   const peerMulti = sdk.MultiHost.of(effects, peerHostId)
+  // Onion peers' port. No exported interface: off the LAN, though every service on the bridge reaches it.
+  await peerMulti.bindPort(peerPortOnion, {
+    protocol: null,
+    preferredExternalPort: peerPortOnion,
+    addSsl: null,
+    secure: { ssl: false },
+  })
   const peerMultiOrigin = await peerMulti.bindPort(peerPortInternal, {
     protocol: null,
     preferredExternalPort: peerPortExternal,
@@ -69,7 +77,7 @@ export const setInterfaces = sdk.setupInterfaces(async ({ effects }) => {
   // the node's own transactions, so no interface is exported and the ports
   // never reach the LAN. Dependents resolve each port with getBridgeAddress
   // by host id and internal port.
-  if (namecoinConf.zmqEnabled) {
+  if (zmqEnabled) {
     const zmqMulti = sdk.MultiHost.of(effects, zmqHostId)
     for (const port of [zmqPortBlock, zmqPortTransaction]) {
       await zmqMulti.bindPort(port, {
